@@ -36,39 +36,47 @@ function seedPizza(over = {}) {
 
 // ============ ITENS DE CARDÁPIO ============
 
-test('getItems retorna vazio no início', () => {
-  assert.deepEqual(store.getItems(), []);
+test('getItems retorna 12 itens seedados no início', () => {
+  const items = store.getItems();
+  assert.equal(items.length, 12, 'Deve ter 12 itens no cardápio inicial (8 pizzas + 4 bebidas)');
 });
 
 test('saveItem cria item novo com id gerado', () => {
+  const countBefore = store.getItems().length;
   const it = seedPizza();
   assert.ok(it.id, 'id deve ser gerado');
-  assert.equal(store.getItems().length, 1);
-  assert.equal(store.getItems()[0].nome, 'Margherita');
+  assert.equal(store.getItems().length, countBefore + 1);
+  const found = store.getItems().find(i => i.id === it.id);
+  assert.equal(found?.nome, 'Margherita');
 });
 
 test('saveItem atualiza item existente (mesmo id, sem duplicar)', () => {
   const it = seedPizza();
+  const countBefore = store.getItems().length;
   store.saveItem({ ...it, preco: 50 });
   const items = store.getItems();
-  assert.equal(items.length, 1, 'não deve duplicar');
-  assert.equal(items[0].preco, 50);
+  assert.equal(items.length, countBefore, 'não deve duplicar');
+  const found = items.find(i => i.id === it.id);
+  assert.equal(found?.preco, 50);
 });
 
 test('deleteItem remove o item e limpa do carrinho', () => {
   const it = seedPizza();
+  const countBefore = store.getItems().length;
   store.addToCart(it.id, 2);
   store.deleteItem(it.id);
-  assert.equal(store.getItems().length, 0);
+  assert.equal(store.getItems().length, countBefore - 1);
   assert.equal(store.getCart().length, 0, 'linha do carrinho órfã deve sumir');
 });
 
 test('adjustStock nunca deixa estoque negativo', () => {
   const it = seedPizza({ estoque: 2 });
   store.adjustStock(it.id, -5);
-  assert.equal(store.getItems()[0].estoque, 0);
+  const itemZero = store.getItems().find(i => i.id === it.id);
+  assert.equal(itemZero?.estoque, 0);
   store.adjustStock(it.id, 3);
-  assert.equal(store.getItems()[0].estoque, 3);
+  const itemTres = store.getItems().find(i => i.id === it.id);
+  assert.equal(itemTres?.estoque, 3);
 });
 
 // ============ CARRINHO ============
@@ -129,7 +137,8 @@ test('createOrder cria pedido, baixa estoque e limpa carrinho', () => {
   assert.equal(order.total, 60);
   assert.equal(order.status, 'recebido');
   assert.ok(order.numero >= 1000 && order.numero <= 9999);
-  assert.equal(store.getItems()[0].estoque, 8, 'estoque deve baixar 2');
+  const itemAtualizado = store.getItems().find(i => i.id === it.id);
+  assert.equal(itemAtualizado?.estoque, 8, 'estoque deve baixar 2');
   assert.equal(store.cartCount(), 0, 'carrinho deve limpar');
 });
 

@@ -22,3 +22,4 @@ screenshots/
 vps/.cloudflare
 vps/*.pem
 vps/*.pub
+ag*.md

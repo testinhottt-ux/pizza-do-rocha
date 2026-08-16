@@ -9,6 +9,28 @@
 
 ## 📋 KNOWN ISSUES
 
+### 🚨 SERVER STARTUP ISSUE (RESOLVIDO - 2026-08-16)
+
+#### Issue #EADDRINUSE: Porta 3000 ocupada e crash não tratado
+
+**Severity**: 🟡 **RESOLVED**
+
+**Sintoma**:
+- `Error: listen EADDRINUSE: address already in use :::3000`
+- Servidor não inicia ao rodar `node server.mjs` ou `npm start`
+
+**Causa-Raiz**:
+1. Processo Node anterior (`PID 141687` / `PID 196682`) permaneceu em execução em background escutando na porta 3000.
+2. `server.mjs` não possuía listener `server.on('error')` para tratar `EADDRINUSE` amigavelmente.
+3. Ausência de Graceful Shutdown (`SIGINT`/`SIGTERM`), fazendo com que paradas abruptas pudessem manter sockets ou instâncias ativas.
+
+**Correções Implementadas**:
+1. Processos zumbis finalizados (`kill` / `clean:port`).
+2. Adicionado listener `server.on('error')` em `server.mjs` que captura `EADDRINUSE` e orienta o usuário com comandos precisos (`fuser -k 3000/tcp` ou portas alternativas).
+3. Adicionado Graceful Shutdown com `SIGINT` e `SIGTERM` chamando `server.close()`.
+4. Adicionados scripts `npm run clean:port`, `npm run test:unit`, `npm run test:server`, `npm run test:deep` em `package.json`.
+5. Validados 100% dos testes (83 testes passando sem falhas).
+
 ### 🚨 CRITICAL SECURITY ISSUE (NEW - v2.3.2)
 
 #### Issue #0: API Key Exposed in Version Control
@@ -856,4 +878,29 @@ Degradação graciosa: URL inválida vira `/` e o request é logado, sem matar o
 - Todo callback **síncrono** de `http.createServer` deve ser à prova de exceção:
   o `.catch()` das rotas async não protege o parse feito antes dele.
 - Ao subir o site, testar sempre os paths hostis: `//`, `/%`, `/../`, `/\`.
+
+## Registro 2026-08-16 — Proteção de Arquivos Sensíveis no Servidor Estático
+
+### Issue #13: Exposição de arquivos internos e credenciais via HTTP estático (CRÍTICO)
+
+**Sintoma**
+Requisições HTTP diretas para arquivos internos (como `/server-config.json`, `/LOGS/.admin-password`, `/ag3.md`, `package.json`) retornavam HTTP 200 servindo o conteúdo em texto plano.
+
+**Causa Raiz**
+A função `servirEstatico` em `server.mjs` apenas validava `abs.startsWith(__dirname)` sem restringir extensões ou pastas sensíveis (`LOGS/`, `wa-session/`, `.admin-password`, `*.mjs`, `*.md`, etc.).
+
+**Correção Aplicada** (`server.mjs`)
+Implementado filtro rigoroso em `servirEstatico` que bloqueia:
+- Arquivos/pastas ocultas (`/(^|\/)\./`)
+- Diretórios internos: `LOGS/`, `wa-session/`, `node_modules/`, `vps/`, `tests/`, `uploads/`
+- Arquivos de código/configuração: `*.mjs`, `*.md`, `*.json` (exceto `manifest.json`), `*.yaml`, `*.env`, `*.log`, `*.pid`, `*.bak`
+- Retorna HTTP 403 Forbidden para qualquer tentativa.
+
+**Verificação**
+- `fetch('/server-config.json')` → 403 Forbidden
+- `fetch('/LOGS/.admin-password')` → 403 Forbidden
+- `fetch('/ag3.md')` → 403 Forbidden
+- `fetch('/manifest.json')`, `fetch('/styles.css')`, `fetch('/store.js')` → 200 OK
+- Suíte `test-server.mjs` e `npm test` 100% aprovados.
+
 

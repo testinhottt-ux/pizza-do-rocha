@@ -34,7 +34,7 @@ http://localhost:8000/index.html
 3. Clique em **✅ ENTRAR**
 4. Abre o painel único **dentro do `index.html`** (sem `Admin.dc.html`)
 
-> **Este é o único painel admin do site.** Ele concentra Cardápio, Estoque, Pedidos, Relatórios e **Configurações da Asaas** (chave de API em `apiassas`, WhatsApp para notificação/webhook — telefone `31996678280`).
+> **Este é o único painel admin do site.** Ele concentra Cardápio, Estoque, Pedidos, Relatórios e **Configurações da InfinitePay** (handle InfinitePay, WhatsApp para notificação/webhook).
 
 ### **Funcionalidades**
 
@@ -143,9 +143,9 @@ http://localhost:8000/index.html
 
 ### **Checkout**
 - Formulário: Nome, Telefone, Endereço
-- Seleção de método de pagamento
+- Seleção de método de pagamento (Pix / Cartão)
 - Resumo visual do pedido
-- Segurança Asaas
+- Integração segura InfinitePay
 
 ### **Meu Pedido**
 - Histórico de pedidos

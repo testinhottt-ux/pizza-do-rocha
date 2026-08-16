@@ -1,8 +1,20 @@
-# Progresso — Pizzaria do Rocha v2.4.0 (REAL ASAAS BACKEND + WEBHOOK/POLING + WHATSAPP UNIFICADO)
+# Progresso — Pizzaria do Rocha v2.5.0 (SERVER STABILITY + PORT RECOVERY + FULL TEST SUITE)
 
-**Status**: ✅ **COMPLETE** — Backend Node real + integração Asaas real  
-**Data**: 2026-08-07  
-**Testes**: 7/7 ✅ | Integração real validada (conexão + cliente) | PIX aguarda aprovação da conta  
+**Status**: ✅ **COMPLETE & RUNNING** — Servidor robusto, auto-recuperação de portas, 83 testes passando  
+**Data**: 2026-08-16  
+**Testes**: 83/83 ✅ | Unitários (19/19), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+
+---
+
+## 🎯 v2.5.0 — REESTRUTURAÇÃO DO SERVIDOR, TRATAMENTO DE EADDRINUSE E TESTES
+
+### ✅ DIAGNÓSTICO E CORREÇÃO DO START DO SERVIDOR
+- **Causa identificada**: A porta `3000` estava travada por uma instância Node anterior rodando em background (`PID 141687`), causando `Error: listen EADDRINUSE: address already in use :::3000`.
+- **Tratamento de erro adicionado**: Listener `server.on('error')` captura `EADDRINUSE` e emite mensagem clara e amigável com comando para liberação (`fuser -k 3000/tcp`) ou porta alternativa (`node server.mjs 3001`).
+- **Graceful Shutdown**: Implementado encerramento limpo em `SIGINT` e `SIGTERM` chamando `server.close()` e finalizando processos filhos.
+- **Suíte de Testes Unificada**:
+  - `npm test`: Executa os testes unitários, E2E, integração de servidor e deep system com 83 checks validados (0 falhas).
+  - Scripts granulares: `test:unit`, `test:e2e`, `test:server`, `test:deep`, `clean:port`.
 
 ---
 

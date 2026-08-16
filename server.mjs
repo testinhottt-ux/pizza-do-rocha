@@ -285,6 +285,17 @@ function servirEstatico(req, res, caminho) {
   // /ad/ redireciona para /ad para os caminhos relativos (images/, store.js) continuarem válidos.
   if (p === '/ad/') { res.writeHead(302, { Location: '/ad' }); res.end(); return; }
   if (p === '/ad') p = '/index.html';
+
+  // Bloqueio de segurança: arquivos ocultos, diretórios internos e arquivos sensíveis
+  if (/(^|\/)\./.test(p) || /^\/(LOGS|wa-session|node_modules|vps|tests|uploads)\b/i.test(p) || /\.(mjs|md|json|ya?ml|env|log|pid|bak)$/i.test(p)) {
+    // Permite apenas manifest.json
+    if (p !== '/manifest.json') {
+      res.writeHead(403);
+      res.end('Forbidden');
+      return;
+    }
+  }
+
   const abs = path.normalize(path.join(__dirname, p));
   if (!abs.startsWith(__dirname)) { res.writeHead(403); res.end('Forbidden'); return; }
   fs.readFile(abs, (err, buf) => {
@@ -704,8 +715,51 @@ const server = http.createServer((req, res) => {
   servirEstatico(req, res, caminho);
 });
 
+// Tratamento de erros de inicialização do servidor (ex: porta ocupada)
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    log('ERROR', 'SERVER', `Porta ${PORT} já está em uso por outro processo`, { porta: PORT });
+    console.error(`\n❌ [ERRO DE INICIALIZAÇÃO] A porta ${PORT} já está ocupada por outro processo!`);
+    console.error(`👉 Para liberar a porta ocupada, execute no terminal:\n   fuser -k ${PORT}/tcp  (ou npm run clean:port)`);
+    console.error(`👉 Ou inicie o servidor em outra porta:\n   node server.mjs ${PORT + 1}  (ou PORT=${PORT + 1} npm start)\n`);
+    process.exit(1);
+  } else {
+    log('ERROR', 'SERVER', 'Erro no servidor HTTP', { error: err.message, code: err.code });
+    console.error(`\n❌ [ERRO NO SERVIDOR] ${err.message}\n`);
+    process.exit(1);
+  }
+});
+
+// Graceful Shutdown (encerramento limpo de conexões)
+function shutdown(signal) {
+  log('INFO', 'SERVER', `Recebido sinal ${signal}. Encerrando servidor de forma graciosa...`);
+  server.close(() => {
+    log('INFO', 'SERVER', 'Servidor HTTP finalizado com sucesso.');
+    process.exit(0);
+  });
+  setTimeout(() => {
+    log('WARN', 'SERVER', 'Forçando encerramento após tempo limite.');
+    process.exit(1);
+  }, 4000).unref();
+}
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+process.on('uncaughtException', (err) => {
+  log('ERROR', 'PROCESS', 'Exceção não tratada capturada', { error: err.message, stack: err.stack });
+  console.error('[ERRO NÃO TRATADO]', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  log('ERROR', 'PROCESS', 'Promise rejeitada não tratada capturada', { reason: String(reason) });
+  console.error('[PROMISE REJEITADA]', reason);
+});
+
 server.listen(PORT, () => {
   log('INFO', 'SERVER', `Pizzaria rodando em http://localhost:${PORT}`);
+  console.log(`\n🍕 Pizzaria do Rocha — Servidor HTTP online em http://localhost:${PORT}`);
+  console.log(`📌 Painel Administrativo Oculto: http://localhost:${PORT}/ad\n`);
   // Inicia a sessão do WhatsApp Web (Baileys) em background para reconectar sessão salva
   WA.iniciarBackground();
 });

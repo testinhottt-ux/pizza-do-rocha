@@ -1,0 +1,50 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sucoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff8c42;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d84315;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sucoShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd54f;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#ffd54f;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ffd54f;stop-opacity:0" />
+    </linearGradient>
+    <filter id="shadowSuco" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  
+  <!-- Sombra base -->
+  <ellipse cx="150" cy="360" rx="85" ry="18" fill="#000" opacity="0.18"/>
+  
+  <!-- Copo com alça -->
+  <path d="M 95 50 L 110 330 Q 110 360 150 365 Q 190 360 190 330 L 205 50 Z" 
+        fill="url(#sucoGrad)" filter="url(#shadowSuco)" stroke="#a84200" stroke-width="0.5"/>
+  
+  <!-- Alça do copo -->
+  <path d="M 205 100 Q 240 120 240 180 Q 240 220 220 240" 
+        fill="none" stroke="url(#sucoGrad)" stroke-width="18" opacity="0.9" filter="url(#shadowSuco)"/>
+  
+  <!-- Brilho principal -->
+  <path d="M 110 55 Q 115 150 118 280" 
+        fill="none" stroke="url(#sucoShine)" stroke-width="14" opacity="0.75"/>
+  
+  <!-- Logo/Marca natural -->
+  <circle cx="150" cy="170" r="28" fill="#fff" opacity="0.08"/>
+  <g opacity="0.35">
+    <circle cx="142" cy="160" r="4" fill="#fff"/>
+    <circle cx="158" cy="165" r="3" fill="#fff"/>
+    <circle cx="150" cy="180" r="3.5" fill="#fff"/>
+  </g>
+  
+  <!-- Reflexos de vidro -->
+  <ellipse cx="125" cy="90" rx="8" ry="25" fill="#fff" opacity="0.5"/>
+  <ellipse cx="175" cy="200" rx="6" ry="20" fill="#fff" opacity="0.3"/>
+  
+  <!-- Gelo/Condensação -->
+  <circle cx="100" cy="70" r="3" fill="#fff" opacity="0.65"/>
+  <circle cx="105" cy="120" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="98" cy="160" r="2.5" fill="#fff" opacity="0.4"/>
+  <circle cx="108" cy="210" r="2" fill="#fff" opacity="0.35"/>
+</svg>

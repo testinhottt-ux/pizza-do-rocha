@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pizzaria Delivery do Rocha</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { CONTATO, FOTOS, getItems, photoFor, money } from './store.js';
+import { renderNav, renderFooter, renderWhatsApp, esc } from './ui.js';
+
+const C = CONTATO;
+const items = getItems().filter((i) => i.ativo !== false);
+const featured = items.slice(0, 3);
+
+const featuredHTML = featured.map((p) => `
+  <a href="Cardapio.dc.html" class="card" style="text-decoration:none;color:var(--creme);">
+    <div class="thumb">
+      <img src="${photoFor(p.nome, p.categoria, p.foto)}" alt="${esc(p.nome)} (ilustrativa)">
+      <span class="ilustra">Ilustrativa</span>
+    </div>
+    <div style="padding:20px 22px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <span style="font-size:21px;font-weight:700;">${esc(p.nome)}</span>
+        <span style="font-size:20px;color:var(--fogo);font-weight:800;">${money(p.preco)}</span>
+      </div>
+      <p style="font-size:15px;color:var(--areia);margin:8px 0 0;">${esc(p.descricao)}</p>
+    </div>
+  </a>`).join('');
+
+document.getElementById('app').innerHTML = `
+${renderNav('home')}
+
+<section class="rise" style="position:relative;min-height:92vh;display:flex;align-items:center;padding:0 64px;overflow:hidden;">
+  <img src="${FOTOS.hero}" alt="Ambiente da Pizzaria do Rocha" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:saturate(1.05);">
+  <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(26,18,16,0.94) 0%,rgba(26,18,16,0.82) 42%,rgba(26,18,16,0.35) 100%);"></div>
+  <div style="position:relative;z-index:2;max-width:980px;">
+    <div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--fogo);margin-bottom:22px;">PIZZARIA DELIVERY · SABOR E QUALIDADE</div>
+    <h1 class="hero-title" style="font-size:150px;line-height:0.9;margin:0;color:var(--creme);text-shadow:0 6px 40px rgba(0,0,0,0.45);">FOGO<br>NA<br>MASSA.</h1>
+    <p style="font-size:22px;line-height:1.5;color:#e6dccd;max-width:540px;margin:32px 0 40px;">Pizza quentinha, feita com amor e entregue com rapidez. Quatro sabores da casa, dois tamanhos para pedir do seu jeito.</p>
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;">
+      <a href="Cardapio.dc.html" class="btn btn-fogo">VER CARDÁPIO</a>
+      <a href="${C.whatsappMsg}" target="_blank" rel="noopener" class="btn btn-ghost">Pedir pelo WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<div style="background:var(--fogo);color:var(--carvao);display:flex;flex-wrap:wrap;gap:8px 40px;justify-content:center;padding:18px 32px;font-weight:700;font-size:15px;">
+  <span>📞 ${esc(C.telefone)}</span><span>🛵 Entrega rápida · WhatsApp ou iFood</span><span>🕒 18h às 21h</span>
+</div>
+
+<section style="background:var(--creme);color:var(--carvao);padding:130px 64px;" class="pad">
+  <div class="grid-2" style="max-width:1200px;margin:0 auto;">
+    <div style="position:relative;">
+      <img src="${FOTOS.historia}" alt="Pizzaiolo (ilustrativa)" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px;box-shadow:0 30px 60px rgba(0,0,0,0.25);">
+      <span class="ilustra" style="left:12px;right:auto;">Imagem ilustrativa</span>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--fogo);margin-bottom:18px;">A ASSINATURA DA CASA</div>
+      <h2 style="font-size:64px;line-height:1.02;margin:0 0 26px;">CADA FATIA<br>FAZ PARTE DA HISTÓRIA.</h2>
+      <p style="font-size:19px;line-height:1.6;color:#4a3d33;max-width:480px;">Um cardápio direto, sabores reconhecíveis e o cuidado de entregar a pizza quente, com rapidez. Escolha sua combinação e peça em poucos cliques.</p>
+    </div>
+  </div>
+</section>
+
+<section style="padding:130px 64px;background:var(--carvao);" class="pad">
+  <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:52px;flex-wrap:wrap;gap:20px;">
+    <h2 style="font-size:72px;margin:0;">DESTAQUES DA CASA</h2>
+    <a href="Cardapio.dc.html" style="font-weight:700;font-size:16px;color:var(--fogo);border-bottom:1px solid var(--fogo);padding-bottom:4px;">Ver cardápio completo →</a>
+  </div>
+  <div class="grid-3">${featuredHTML}</div>
+</section>
+
+<section style="padding:130px 64px;background:var(--creme);color:var(--carvao);" class="pad">
+  <h2 style="font-size:64px;margin:0 0 68px;text-align:center;">PEÇA DO SEU JEITO</h2>
+  <div class="grid-3" style="max-width:1200px;margin:0 auto;gap:56px;">
+    <div><div style="font-family:'Bebas Neue';font-size:56px;color:var(--fogo);margin-bottom:14px;">01</div><h3 style="font-size:22px;margin:0 0 10px;font-family:'Work Sans';font-weight:700;">Escolha o sabor</h3><p style="font-size:16px;color:#4a3d33;line-height:1.6;margin:0;">Portuguesa, Calabresa, Presunto com muçarela ou Marguerita.</p></div>
+    <div><div style="font-family:'Bebas Neue';font-size:56px;color:var(--fogo);margin-bottom:14px;">02</div><h3 style="font-size:22px;margin:0 0 10px;font-family:'Work Sans';font-weight:700;">Escolha o tamanho</h3><p style="font-size:16px;color:#4a3d33;line-height:1.6;margin:0;">Média de 30 cm com 6 pedaços ou gigante de 35 cm com 8 pedaços.</p></div>
+    <div><div style="font-family:'Bebas Neue';font-size:56px;color:var(--fogo);margin-bottom:14px;">03</div><h3 style="font-size:22px;margin:0 0 10px;font-family:'Work Sans';font-weight:700;">Receba com rapidez</h3><p style="font-size:16px;color:#4a3d33;line-height:1.6;margin:0;">Peça pelo WhatsApp ou iFood, das 18h às 21h.</p></div>
+  </div>
+</section>
+
+<section id="contato" style="padding:130px 64px;background:var(--carvao);" class="pad">
+  <div class="grid-2" style="max-width:1200px;margin:0 auto;">
+    <div>
+      <div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--fogo);margin-bottom:18px;">PEDIDOS ABERTOS</div>
+      <h2 style="font-size:68px;line-height:1;margin:0 0 32px;">A PRÓXIMA FATIA<br>É SUA.</h2>
+      <div style="display:flex;flex-direction:column;gap:20px;margin-bottom:36px;">
+        <div style="display:flex;gap:14px;"><span style="font-size:22px;">📞</span><div><div style="font-size:13px;letter-spacing:1px;color:var(--musgo);">TELEFONE / WHATSAPP</div><a href="${C.whatsappMsg}" target="_blank" rel="noopener" style="font-size:20px;font-weight:700;color:var(--creme);">${esc(C.telefone)}</a></div></div>
+         <div style="display:flex;gap:14px;"><span style="font-size:22px;">🛵</span><div><div style="font-size:13px;letter-spacing:1px;color:var(--musgo);">ENTREGA</div><div style="font-size:18px;font-weight:600;color:var(--creme);line-height:1.5;">Rápida · WhatsApp ou iFood</div></div></div>
+         <div style="display:flex;gap:14px;"><span style="font-size:22px;">🕒</span><div><div style="font-size:13px;letter-spacing:1px;color:var(--musgo);">HORÁRIO</div><div style="font-size:18px;font-weight:600;color:var(--creme);">Todos os dias · 18h às 21h</div></div></div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <a href="${C.whatsappMsg}" target="_blank" rel="noopener" class="btn btn-zap" style="font-size:16px;padding:16px 28px;">Chamar no WhatsApp</a>
+        <a href="tel:${C.telefoneDigits}" class="btn btn-ghost" style="font-size:16px;padding:16px 28px;">Ligar agora</a>
+      </div>
+    </div>
+     <div style="display:flex;flex-direction:column;justify-content:space-between;min-height:340px;padding:42px;background:linear-gradient(145deg,var(--carvao2),#0f0b0a);border:1px solid rgba(244,237,225,0.12);border-radius:8px;">
+       <div><span style="display:block;color:var(--fogo);font-size:13px;font-weight:800;letter-spacing:3px;margin-bottom:20px;">ENTREGA DO ROCHA</span><strong style="display:block;font-family:'Bebas Neue';font-size:clamp(42px,7vw,72px);line-height:.95;color:var(--creme);">QUENTE.<br>RÁPIDA.<br>DO SEU JEITO.</strong></div>
+       <span style="color:var(--areia);font-size:16px;line-height:1.6;">WhatsApp ou iFood<br>Atendimento das 18h às 21h</span>
+     </div>
+  </div>
+</section>
+
+${renderFooter()}
+${renderWhatsApp()}
+`;
+</script>
+</body>
+</html>

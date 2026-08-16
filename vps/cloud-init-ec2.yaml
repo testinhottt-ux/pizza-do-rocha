@@ -1,0 +1,55 @@
+#cloud-config
+# ─────────────────────────────────────────────────────────────
+# Pizzaria do Rocha — Setup automático AWS EC2 Free Tier (t2.micro / t3.micro)
+# Como usar: Na criação da instância EC2 (Advanced Details -> User Data),
+# cole este script. A VM já sobe com Node.js 20, Nginx e PM2 configurados!
+# ─────────────────────────────────────────────────────────────
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - git
+  - nginx
+  - htop
+  - ca-certificates
+
+write_files:
+  - path: /etc/nginx/sites-available/pizzaria.conf
+    permissions: '0644'
+    content: |
+      server {
+          listen 80;
+          server_name _;
+          client_max_body_size 25M;
+          location / {
+              proxy_pass http://127.0.0.1:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+          }
+      }
+
+runcmd:
+  - echo "=== [1/4] Instalando Node.js 20 LTS ==="
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+  - mkdir -p /opt/app
+
+  - echo "=== [2/4] Instalando PM2 ==="
+  - npm install -g pm2
+
+  - echo "=== [3/4] Configurando Nginx Reverse Proxy ==="
+  - rm -f /etc/nginx/sites-enabled/default
+  - ln -sf /etc/nginx/sites-available/pizzaria.conf /etc/nginx/sites-enabled/pizzaria.conf
+  - nginx -t && systemctl restart nginx
+  - systemctl enable nginx
+
+  - echo "=== [4/4] Permissões do diretório ==="
+  - chown -R ubuntu:ubuntu /opt/app 2>/dev/null || chown -R admin:admin /opt/app 2>/dev/null || true
+  - chmod 0755 /opt/app
+  - echo "Configuração concluída com sucesso."

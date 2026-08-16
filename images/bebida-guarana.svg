@@ -1,0 +1,45 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="guaranaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffb300;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#ff9500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#cc7700;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="guaranaShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#ffd700;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#ffd700;stop-opacity:0" />
+    </linearGradient>
+    <filter id="shadowGua" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="4" dy="8" stdDeviation="6" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Sombra base -->
+  <ellipse cx="150" cy="360" rx="90" ry="20" fill="#000" opacity="0.15"/>
+  
+  <!-- Tampa dourada -->
+  <rect x="115" y="15" width="70" height="12" rx="3" fill="#ffd700" filter="url(#shadowGua)"/>
+  <rect x="112" y="25" width="76" height="6" rx="2" fill="#daa520"/>
+  
+  <!-- Garrafa -->
+  <path d="M 110 35 Q 100 70 100 150 Q 100 200 120 280 Q 120 320 150 330 Q 180 320 180 280 Q 200 200 200 150 Q 200 70 190 35 Z" 
+        fill="url(#guaranaGrad)" filter="url(#shadowGua)" stroke="#994400" stroke-width="1"/>
+  
+  <!-- Brilho esquerdo -->
+  <path d="M 115 40 Q 118 100 118 150 Q 118 200 120 270" 
+        fill="none" stroke="url(#guaranaShine)" stroke-width="12" opacity="0.7"/>
+  
+  <!-- Marca/Logo -->
+  <circle cx="150" cy="160" r="35" fill="#fff" opacity="0.08"/>
+  <text x="150" y="168" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff" opacity="0.4">GUARANÁ</text>
+  
+  <!-- Reflexos -->
+  <ellipse cx="130" cy="85" rx="9" ry="22" fill="#fff" opacity="0.45"/>
+  <ellipse cx="175" cy="210" rx="7" ry="18" fill="#fff" opacity="0.28"/>
+  
+  <!-- Condensação tropical -->
+  <circle cx="108" cy="60" r="2.5" fill="#fff" opacity="0.7"/>
+  <circle cx="115" cy="100" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="110" cy="145" r="1.5" fill="#fff" opacity="0.4"/>
+</svg>

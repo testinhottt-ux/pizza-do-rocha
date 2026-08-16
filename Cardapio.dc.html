@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cardápio — Pizzaria do Rocha</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { CONTATO, getItems, addToCart, photoFor, money } from './store.js';
+import { renderNav, renderFooter, renderWhatsApp, refreshCartBadge, toast, esc } from './ui.js';
+
+const C = CONTATO;
+let categoria = 'Todas';
+
+function activeItems() { return getItems().filter((i) => i.ativo !== false); }
+
+function render() {
+  const items = activeItems();
+  const cats = ['Todas', ...Array.from(new Set(items.map((i) => i.categoria).filter(Boolean)))];
+  const filtered = categoria === 'Todas' ? items : items.filter((i) => i.categoria === categoria);
+
+  const chips = cats.map((c) => `
+    <button data-cat="${esc(c)}" style="padding:10px 22px;border-radius:24px;cursor:pointer;font-size:14px;font-weight:600;
+      border:1px solid ${c === categoria ? 'var(--fogo)' : 'rgba(244,237,225,0.25)'};
+      background:${c === categoria ? 'var(--fogo)' : 'transparent'};
+      color:${c === categoria ? 'var(--carvao)' : 'var(--creme)'};">${esc(c)}</button>`).join('');
+
+  const cards = filtered.map((p) => {
+    const estoque = p.estoque ?? 0;
+    const semEstoque = estoque <= 0;
+    const label = semEstoque ? 'Esgotado' : estoque <= 3 ? `Só ${estoque} restando` : 'Disponível';
+    const cor = semEstoque ? '#8a5b5b' : estoque <= 3 ? '#e3a72f' : '#7fae7a';
+    return `
+    <div class="card">
+      <div class="thumb">
+        <img src="${photoFor(p.nome, p.categoria, p.foto)}" alt="${esc(p.nome)} (ilustrativa)">
+        <span class="ilustra">Ilustrativa</span>
+      </div>
+      <div style="padding:24px;display:flex;flex-direction:column;flex:1;">
+        <div style="font-size:12px;letter-spacing:1.5px;color:#cf8c62;font-weight:800;margin-bottom:8px;">${esc(p.categoria || '')}</div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:8px;">${esc(p.nome)}</div>
+        <p style="font-size:15px;color:var(--areia);line-height:1.5;margin:0 0 20px;flex:1;">${esc(p.descricao || '')}</p>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <span style="font-size:22px;font-weight:800;color:var(--fogo);">${money(p.preco)}</span>
+          <span style="font-size:13px;color:${cor};">${label}</span>
+        </div>
+        <button class="btn ${semEstoque ? '' : 'btn-fogo'}" data-add="${esc(p.id)}" ${semEstoque ? 'disabled' : ''}
+          style="width:100%;font-size:15px;padding:14px;">${semEstoque ? 'Esgotado' : 'Adicionar ao carrinho'}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const body = items.length === 0
+    ? `<div style="border:1px dashed rgba(244,237,225,0.25);border-radius:6px;padding:90px 40px;text-align:center;">
+         <p style="font-family:'Bebas Neue';font-size:40px;margin:0 0 16px;color:var(--areia);">CARDÁPIO EM MONTAGEM</p>
+         <a href="${C.whatsappMsg}" target="_blank" rel="noopener" class="btn btn-zap">Pedir pelo WhatsApp</a>
+       </div>`
+    : `<div class="pad" style="padding:0 0 24px;display:flex;gap:14px;flex-wrap:wrap;">${chips}</div>
+       <div class="grid-3">${cards}</div>`;
+
+  document.getElementById('app').innerHTML = `
+  ${renderNav('cardapio')}
+  <header style="padding:90px 64px 20px;" class="pad">
+    <div style="font-size:15px;font-weight:800;letter-spacing:3px;color:var(--fogo);margin-bottom:18px;">CARDÁPIO DA PROPAGANDA</div>
+    <h1 style="font-size:96px;margin:0;">PIZZAS DO ROCHA.</h1>
+    <p style="font-size:15px;color:var(--musgo);margin:14px 0 0;">Média 30 cm / 6 pedaços: R$ 49,99 · Gigante 35 cm / 8 pedaços: R$ 59,99 · WhatsApp: <a href="${C.whatsappMsg}" target="_blank" rel="noopener">${esc(C.telefone)}</a></p>
+  </header>
+  <main style="padding:24px 64px 160px;" class="pad">${body}</main>
+  ${renderFooter()}
+  ${renderWhatsApp()}`;
+
+  document.querySelectorAll('[data-cat]').forEach((b) =>
+    b.addEventListener('click', () => { categoria = b.getAttribute('data-cat'); render(); }));
+  document.querySelectorAll('[data-add]').forEach((b) =>
+    b.addEventListener('click', () => {
+      addToCart(b.getAttribute('data-add'), 1);
+      refreshCartBadge();
+      toast('Adicionado ao carrinho — <a href="Carrinho.dc.html" style="color:var(--fogo);font-weight:700;">ver carrinho</a>');
+    }));
+}
+
+render();
+</script>
+</body>
+</html>

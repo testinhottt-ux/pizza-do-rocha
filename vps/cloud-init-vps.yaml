@@ -1,0 +1,68 @@
+#cloud-config
+# ─────────────────────────────────────────────────────────────
+# Pizzaria do Rocha — Setup automático do VPS (Google Cloud e2-micro)
+# COMO USAR: no console da Google, ao criar a VM, cole ESTE script
+# no campo "Automação" (Cloud-init) e clique Criar. NÃO precisa de terminal.
+# Compatível com imagem Debian 12 | Ubuntu 22.04/24.04
+# ─────────────────────────────────────────────────────────────
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - git
+  - nginx
+  - htop
+  - ufw
+  - ca-certificates
+
+write_files:
+  - path: /opt/app/README.txt
+    content: |
+      Diretório /opt/app criado. Suba os arquivos do projeto com:
+        bash vps/upload.sh SEU_IP_EXTERNO
+      O script enviará os arquivos e iniciará o servidor com o PM2 automaticamente.
+  - path: /etc/nginx/sites-available/pizzaria.conf
+    permissions: '0644'
+    content: |
+      server {
+          listen 80;
+          server_name _;
+          client_max_body_size 20M;
+          location / {
+              proxy_pass http://127.0.0.1:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+          }
+      }
+
+runcmd:
+  - echo "=== [1/5] Instalando Node.js 20 LTS ==="
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+  - mkdir -p /opt/app
+
+  - echo "=== [2/5] Instalando pm2 (gestor de processos) ==="
+  - npm install -g pm2
+
+  - echo "=== [3/5] Liberando firewall ==="
+  - ufw allow OpenSSH 2>/dev/null || true
+  - ufw allow 80/tcp 2>/dev/null || true
+  - ufw allow 443/tcp 2>/dev/null || true
+  - ufw allow 3000/tcp 2>/dev/null || true
+  - ufw --force enable 2>/dev/null || true
+
+  - echo "=== [4/5] Configurando nginx (reverse proxy) ==="
+  - rm -f /etc/nginx/sites-enabled/default
+  - ln -sf /etc/nginx/sites-available/pizzaria.conf /etc/nginx/sites-enabled/pizzaria.conf
+  - nginx -t && systemctl restart nginx
+
+  - echo "=== [5/5] Preparando diretório do app ==="
+  - chmod 0755 /opt/app
+  - echo "Pronto! Suba os arquivos do app para /opt/app e rode: pm2 start server.mjs"
+
+final_message: "VPS Pizzaria PRONTO — Node $NODE_VERSION | npm $NPM_VERSION | nginx rodando | porta 3000 liberada"

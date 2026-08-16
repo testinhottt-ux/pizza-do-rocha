@@ -877,21 +877,23 @@ currentPage = page;
   async function renderHome() {
     const featured = store.getItems().filter(i => i.ativo !== false).slice(0, 3);
     const html = featured.map(p => `
-      <a href="#" onclick="goToPage('cardapio')" style="text-decoration:none;color:var(--creme);">
-        <div class="card">
-          <div class="thumb">
-            <img src="${store.photoFor(p.nome, p.categoria, p.foto)}" alt="${escapeHtml(p.nome)}" onerror="this.src='images/pizza-generica.jpg'">
-            <span class="ilustra">Ilustrativa</span>
+      <div class="card" style="cursor:pointer;display:flex;flex-direction:column;height:100%;" onclick="goToPage('cardapio')">
+        <div class="thumb">
+          <img src="${store.photoFor(p.nome, p.categoria, p.foto)}" alt="${escapeHtml(p.nome)}" onerror="this.src='images/pizza-generica.jpg'">
+          <span class="ilustra">Destaque</span>
+        </div>
+        <div style="padding:22px;display:flex;flex-direction:column;flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
+            <span style="font-size:22px;font-weight:700;color:var(--creme);line-height:1.2;">${escapeHtml(p.nome)}</span>
+            <span style="font-size:20px;color:var(--fogo);font-weight:800;white-space:nowrap;">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
           </div>
-          <div style="padding:20px 22px;">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;">
-              <span style="font-size:21px;font-weight:700;">${escapeHtml(p.nome)}</span>
-              <span style="font-size:20px;color:var(--fogo);font-weight:800;">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <p style="font-size:15px;color:var(--areia);margin:8px 0 0;">${escapeHtml(p.descricao || '')}</p>
+          <p style="font-size:14px;color:var(--areia);line-height:1.6;margin:0 0 20px;flex:1;">${escapeHtml(p.descricao || '')}</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px;border-top:1px solid rgba(252,248,242,0.06);">
+            <span style="font-size:13px;font-weight:700;color:var(--fogo);">Personalizar e Pedir</span>
+            <span style="font-size:14px;color:var(--fogo);">→</span>
           </div>
         </div>
-      </a>
+      </div>
     `).join('');
     document.getElementById('featuredProducts').innerHTML = html;
   }

@@ -2388,15 +2388,58 @@ window.testPaymentConnection = async function() {
     setTimeout(killPreloader, 900);
   });
 
-  /* ---------- PWA Service Worker ---------- */
+  /* ---------- PWA Service Worker & Install Prompt ---------- */
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner && !sessionStorage.getItem('pwa_dismissed')) {
+      banner.style.display = 'flex';
+    }
+  });
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js').catch(function() {});
     });
   }
 
+  window.instalarPwaApp = async function() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById('pwaInstallBanner').style.display = 'none';
+    } else {
+      // Dica para navegadores que não suportam beforeinstallprompt (Firefox/Safari)
+      alert('Para adicionar à tela inicial:\n\n• No Android/Chrome: Toque nos 3 pontos ⋮ e escolha "Instalar aplicativo" ou "Adicionar à tela inicial".\n• No iPhone/Safari: Toque no botão Compartilhar ⎋ e escolha "Adicionar à Tela de Início".');
+    }
+  };
+
+  window.fecharPwaBanner = function() {
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.style.display = 'none';
+    sessionStorage.setItem('pwa_dismissed', '1');
+  };
+
 })();
 </script>
+
+<!-- PWA Install Prompt Banner -->
+<div id="pwaInstallBanner" style="display: none; position: fixed; bottom: 24px; left: 24px; right: 24px; max-width: 440px; margin: 0 auto; background: linear-gradient(135deg, #2a1f1c 0%, #1a1210 100%); border: 1px solid rgba(232,67,47,0.5); border-radius: 12px; padding: 16px 20px; z-index: 9999; box-shadow: 0 16px 40px rgba(0,0,0,0.7); align-items: center; justify-content: space-between; gap: 14px;">
+  <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+    <span style="font-size: 28px; flex-shrink: 0;">🍕</span>
+    <div style="min-width: 0;">
+      <div style="font-weight: 800; font-size: 15px; color: var(--creme); line-height: 1.2;">Instalar App da Pizzaria</div>
+      <div style="font-size: 13px; color: var(--areia); margin-top: 2px;">Adicione à tela inicial para pedir mais rápido!</div>
+    </div>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+    <button onclick="instalarPwaApp()" style="padding: 10px 18px; background: var(--fogo); color: var(--carvao); font-weight: 800; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap;">Instalar</button>
+    <button onclick="fecharPwaBanner()" style="background: none; border: none; color: var(--areia); font-size: 24px; cursor: pointer; padding: 4px 6px; line-height: 1;">&times;</button>
+  </div>
+</div>
 
 </body>
 </html>

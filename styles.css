@@ -1,0 +1,190 @@
+/* Pizzaria do Rocha — estilo global (nível awwwards) */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --fogo: #e8432f;
+  --fogo-esc: #c53321;
+  --carvao: #1a1210;
+  --carvao2: #221714;
+  --creme: #f4ede1;
+  --areia: #cbb9a8;
+  --musgo: #8a7862;
+  --zap: #25D366;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100%; }
+body {
+  margin: 0;
+  font-family: 'Work Sans', sans-serif;
+  background: var(--carvao);
+  color: var(--creme);
+  overflow-x: hidden;
+  max-width: 100%;
+  position: relative;
+}
+a { color: var(--fogo); text-decoration: none; transition: color .2s; }
+a:hover { color: var(--creme); }
+::selection { background: var(--fogo); color: var(--creme); }
+h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.5px; font-weight: 400; }
+button { font-family: 'Work Sans', sans-serif; }
+
+/* NAV */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 64px;
+  background: rgba(26,18,16,0.82); backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(244,237,225,0.1);
+}
+.brand { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; color: var(--creme); }
+.brand span { color: var(--fogo); }
+.nav-links { display: flex; align-items: center; gap: 34px; }
+.nav-links a { font-size: 15px; font-weight: 600; letter-spacing: 0.5px; color: var(--creme); }
+.nav-admin { font-size: 12px; color: var(--musgo); border-bottom: 1px solid var(--musgo); }
+
+/* Hamburguer (só aparece no mobile) */
+.nav-toggle {
+  display: none; width: 44px; height: 44px; border: none; background: transparent;
+  cursor: pointer; padding: 10px; z-index: 60; flex-direction: column; justify-content: space-between;
+}
+.nav-toggle span {
+  display: block; height: 2px; width: 100%; background: var(--creme); border-radius: 2px;
+  transition: transform .3s ease, opacity .25s ease;
+}
+.nav-toggle.open span:nth-child(1) { transform: translateY(11px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-11px) rotate(-45deg); }
+.nav-overlay {
+  position: fixed; inset: 0; background: rgba(26,18,16,0.55); backdrop-filter: blur(2px);
+  opacity: 0; pointer-events: none; transition: opacity .3s ease; z-index: 40;
+}
+.nav-overlay.show { opacity: 1; pointer-events: auto; }
+.nav-links a.active { color: var(--fogo); }
+.cart-pill {
+  display: flex; align-items: center; gap: 8px;
+}
+.cart-pill .badge {
+  background: var(--fogo); color: var(--creme); font-size: 12px; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px; min-width: 20px; text-align: center;
+}
+
+/* Botões */
+.btn { display: inline-block; border: none; cursor: pointer; border-radius: 4px; font-weight: 800; font-size: 16px; padding: 18px 34px; }
+.btn-fogo { background: var(--fogo); color: var(--carvao); }
+.btn-fogo:hover { background: #ff5138; color: var(--carvao); }
+.btn-ghost { background: transparent; color: var(--creme); border: 1px solid rgba(244,237,225,0.35); }
+.btn-ghost:hover { border-color: var(--creme); color: var(--creme); }
+.btn-zap { background: var(--zap); color: #063; }
+.btn-zap:hover { color: #041; }
+.btn:disabled { background: #3a2c26; color: var(--musgo); cursor: not-allowed; }
+
+/* Badge ilustrativa */
+.ilustra {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(26,18,16,0.72); color: var(--creme);
+  font-size: 10px; letter-spacing: 0.5px; padding: 5px 9px; border-radius: 4px;
+}
+
+/* Card de pizza */
+.card {
+  background: var(--carvao2); border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+}
+.card .thumb { position: relative; aspect-ratio: 4/3; overflow: hidden; }
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
+.card:hover .thumb img { transform: scale(1.07); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+
+/* WhatsApp flutuante */
+.wa-float {
+  position: fixed; right: 24px; bottom: 24px; z-index: 200;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--zap); color: #063; font-weight: 800; font-size: 15px;
+  padding: 14px 20px 14px 16px; border-radius: 40px;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.5); transition: transform .18s ease;
+}
+.wa-float:hover { transform: translateY(-3px); color: #041; }
+.wa-float svg { width: 26px; height: 26px; }
+
+/* Footer */
+.footer { padding: 56px 64px; background: #0f0b0a; }
+.footer .row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 32px; max-width: 1200px; margin: 0 auto; }
+.footer a { color: var(--musgo); }
+.footer .note { text-align: center; font-size: 12px; color: #5c4d40; margin: 40px 0 0; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 96px; right: 24px; z-index: 150;
+  background: var(--creme); color: var(--carvao); padding: 16px 24px; border-radius: 6px;
+  font-size: 15px; font-weight: 600; box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  opacity: 0; transform: translateY(12px); pointer-events: none; transition: all .25s ease;
+}
+.toast.show { opacity: 1; transform: none; }
+
+.rise { animation: rise .8s ease both; }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+/* Responsivo — Tablet */
+@media (max-width: 960px) {
+  .nav { padding: 16px 24px; }
+  .grid-2 { gap: 40px; }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+}
+
+/* Responsivo — Mobile (drawer + ajustes) */
+@media (max-width: 760px) {
+  .nav { padding: 14px 20px; }
+  .brand { font-size: 22px; white-space: nowrap; }
+  .nav-toggle { display: flex; }
+
+  /* Drawer lateral */
+  .nav-links {
+    position: fixed; top: 0; right: 0; height: 100dvh; width: min(80vw, 320px);
+    flex-direction: column; align-items: flex-start; justify-content: flex-start;
+    gap: 8px; padding: 90px 28px 40px;
+    background: var(--carvao2); border-left: 1px solid rgba(244,237,225,0.1);
+    box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    transform: translateX(100%); transition: transform .35s cubic-bezier(0.4,0,0.2,1);
+    z-index: 55; overflow-y: auto;
+  }
+  .nav-links.open { transform: translateX(0); }
+  .nav-links a { font-size: 18px; padding: 12px 0; width: 100%; }
+  .nav-links .cart-pill { margin-top: 8px; }
+  .nav-admin { margin-top: 12px; border-bottom: none; opacity: 0.7; }
+
+  /* Padding lateral consistente */
+  section, header, main, .footer, .pad { padding-left: 20px !important; padding-right: 20px !important; }
+
+  /* Grids empilham */
+  .grid-2, .grid-3 { grid-template-columns: 1fr !important; gap: 28px !important; }
+  .checkout-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+
+  /* Espaço extra no fim das páginas para o botão flutuante não cobrir CTAs */
+  main { padding-bottom: 110px !important; }
+
+  /* Tipografia grande controlada */
+  .hero-title { font-size: clamp(52px, 18vw, 84px) !important; }
+  h1 { font-size: clamp(44px, 13vw, 68px) !important; line-height: 1.02; word-break: break-word; }
+  h2 { font-size: clamp(34px, 10vw, 56px) !important; line-height: 1.05; }
+
+  /* WhatsApp flutuante compacto (só ícone) — não sobrepõe CTAs */
+  .wa-float {
+    right: 16px; bottom: 16px; padding: 0; width: 56px; height: 56px;
+    border-radius: 50%; justify-content: center; font-size: 0; gap: 0;
+  }
+  .wa-float svg { width: 28px; height: 28px; }
+
+  .toast { bottom: 84px; right: 16px; left: 16px; text-align: center; }
+}
+
+/* Telas bem estreitas */
+@media (max-width: 380px) {
+  .hero-title { font-size: clamp(44px, 16vw, 64px) !important; }
+  section, header, main, .footer, .pad { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* Esconde cursor customizado em dispositivos de toque */
+@media (hover: none), (pointer: coarse) {
+  .cursor-ring, .cursor-dot { display: none !important; }
+}

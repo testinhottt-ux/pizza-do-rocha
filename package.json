@@ -1,0 +1,17 @@
+{
+  "name": "pizzaria-do-rocha",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site da Pizzaria do Rocha — checkout InfinitePay (Pix/cartão), WhatsApp Web (Baileys) e modo landing page.",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs 3000",
+    "test": "node test-all.mjs"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

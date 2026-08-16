@@ -203,7 +203,8 @@ export function clearCart() { const db = load(); db.cart = []; save(db); }
 export function cartCount() { return load().cart.reduce((s, c) => s + c.qtd, 0); }
 
 export function cartTotal() {
-  return getCart().reduce((s, c) => s + c.qtd * (c.item.preco || 0), 0);
+  const sum = getCart().reduce((s, c) => s + c.qtd * (c.item.preco || 0), 0);
+  return Math.round(sum * 100) / 100;
 }
 
 // ---- Pedidos ----
@@ -221,7 +222,7 @@ export function createOrder({ cliente, pagamento, id, numero }) {
     const item = db.items.find((i) => i.id === c.itemId);
     return item ? { itemId: c.itemId, nome: item.nome, qtd: c.qtd, preco: item.preco } : null;
   }).filter(Boolean);
-  const total = cartLines.reduce((s, l) => s + l.qtd * l.preco, 0);
+  const total = Math.round(cartLines.reduce((s, l) => s + l.qtd * l.preco, 0) * 100) / 100;
   const order = {
     id: id || uid('ped'),
     numero: Number(numero) || Math.floor(1000 + Math.random() * 9000),

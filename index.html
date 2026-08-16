@@ -3,9 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Pizzaria Delivery do Rocha. Sabor e qualidade em cada fatia.">
+<meta name="description" content="Pizzaria Delivery do Rocha. Sabor e qualidade em cada fatia. Peça online com entrega rápida e pagamento via Pix ou Cartão.">
 <meta name="theme-color" content="#e8432f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pizzaria Delivery do Rocha — Sabor em Cada Fatia">
+<meta property="og:description" content="Pizzas artesanais quentinhas, bebidas e sobremesas. Peça online com entrega rápida!">
+<meta property="og:image" content="images/pizza-margherita.jpg">
+<meta property="og:url" content="https://pizza-do-rocha.onrender.com">
+<meta name="twitter:card" content="summary_large_image">
 <title>Pizzaria Delivery do Rocha</title>
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-weight='bold' fill='%23e8432f'>🍕</text></svg>">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="awards.css">
@@ -352,6 +362,58 @@
       </div>
       <button onclick="loginAdmin()">✅ ENTRAR</button>
       <button onclick="fecharAdminModal()" style="background: transparent; color: var(--musgo); border: 1px solid var(--musgo);">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE PERSONALIZAÇÃO DE PIZZA -->
+<div class="modal" id="pizzaCustomModal" style="z-index: 1100;">
+  <div class="modal-content" style="max-width: 520px; background: var(--carvao2); border-radius: 12px; padding: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 id="customModalTitle" style="margin: 0; font-size: 22px; color: var(--creme);">Personalizar Pizza</h2>
+      <button onclick="fecharPizzaCustomModal()" style="background: none; border: none; color: var(--areia); font-size: 28px; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    
+    <!-- Tipo: 1 Sabor ou 2 Sabores -->
+    <div style="margin-bottom: 18px;">
+      <label style="display: block; font-size: 13px; letter-spacing: 1px; color: var(--musgo); font-weight: 700; margin-bottom: 8px;">QUANTIDADE DE SABORES</label>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button type="button" id="btnSabor1" onclick="setSaboresModo(1)" style="padding: 10px; border-radius: 6px; border: 1px solid var(--fogo); background: var(--fogo); color: var(--carvao); font-weight: 700; cursor: pointer;">1 Sabor Inteiro</button>
+        <button type="button" id="btnSabor2" onclick="setSaboresModo(2)" style="padding: 10px; border-radius: 6px; border: 1px solid rgba(244,237,225,0.2); background: rgba(244,237,225,0.05); color: var(--creme); font-weight: 700; cursor: pointer;">½ Meio a Meio</button>
+      </div>
+    </div>
+
+    <!-- Segundo Sabor (se meio a meio) -->
+    <div id="segundoSaborContainer" style="display: none; margin-bottom: 18px;">
+      <label style="display: block; font-size: 13px; letter-spacing: 1px; color: var(--musgo); font-weight: 700; margin-bottom: 8px;">ESCOLHA O 2º SABOR</label>
+      <select id="segundoSaborSelect" onchange="recalcularPrecoCustom()" style="width: 100%; padding: 12px; border-radius: 6px; background: #2a1f1c; border: 1px solid rgba(244,237,225,0.2); color: var(--creme); font-size: 15px;">
+      </select>
+    </div>
+
+    <!-- Borda Recheada -->
+    <div style="margin-bottom: 18px;">
+      <label style="display: block; font-size: 13px; letter-spacing: 1px; color: var(--musgo); font-weight: 700; margin-bottom: 8px;">BORDA RECHEADA</label>
+      <select id="bordaSelect" onchange="recalcularPrecoCustom()" style="width: 100%; padding: 12px; border-radius: 6px; background: #2a1f1c; border: 1px solid rgba(244,237,225,0.2); color: var(--creme); font-size: 15px;">
+        <option value="Tradicional" data-price="0">Tradicional (Sem Borda Recheada) · Grátis</option>
+        <option value="Catupiry Original" data-price="8.00">Catupiry Original (+R$ 8,00)</option>
+        <option value="Cheddar Cremoso" data-price="8.00">Cheddar Cremoso (+R$ 8,00)</option>
+        <option value="Chocolate Doce" data-price="10.00">Chocolate Doce (+R$ 10,00)</option>
+      </select>
+    </div>
+
+    <!-- Observações -->
+    <div style="margin-bottom: 24px;">
+      <label style="display: block; font-size: 13px; letter-spacing: 1px; color: var(--musgo); font-weight: 700; margin-bottom: 8px;">OBSERVAÇÕES (OPCIONAL)</label>
+      <input type="text" id="pizzaObsInput" placeholder="Ex: Sem cebola, massa fininha, bem assada..." style="width: 100%; padding: 12px; border-radius: 6px; background: #2a1f1c; border: 1px solid rgba(244,237,225,0.2); color: var(--creme); font-size: 14px; box-sizing: border-box;">
+    </div>
+
+    <!-- Total e Confirmar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid rgba(244,237,225,0.1);">
+      <div>
+        <div style="font-size: 12px; color: var(--areia);">Total deste item:</div>
+        <div id="customModalPrecoTotal" style="font-size: 22px; font-weight: 800; color: var(--fogo);">R$ 0,00</div>
+      </div>
+      <button onclick="confirmarPizzaCustom()" style="padding: 14px 24px; background: var(--fogo); color: var(--carvao); font-weight: 800; border: none; border-radius: 6px; cursor: pointer; font-size: 15px;">ADICIONAR 🍕</button>
     </div>
   </div>
 </div>
@@ -835,13 +897,130 @@ currentPage = page;
   }
 
   // ===== CARDÁPIO PAGE =====
-  // Botão do card — vira "Pedir no WhatsApp" no modo landing
+  // Botão do card — vira "Pedir no WhatsApp" no modo landing ou abre personalizador
   function botaoCardapio(p) {
     if (serverState.modoLanding === true) {
       return `<a href="${linkPedirWhatsApp(p)}" target="_blank" rel="noopener" style="display:block;width:100%;text-align:center;font-size:15px;padding:14px;background:var(--fogo);color:var(--carvao);border:none;border-radius:4px;cursor:pointer;font-weight:700;text-decoration:none;">Pedir no WhatsApp</a>`;
     }
-    return `<button onclick="addToCart('${p.id}')" ${p.estoque <= 0 ? 'disabled' : ''} style="width:100%;font-size:15px;padding:14px;${p.estoque <= 0 ? 'background:#3a2c26;color:#8a7862;cursor:not-allowed;border:none;border-radius:4px;' : 'background:var(--fogo);color:var(--carvao);border:none;border-radius:4px;cursor:pointer;font-weight:700;'}">${p.estoque <= 0 ? 'Esgotado' : 'Adicionar ao carrinho'}</button>`;
+    const isBebida = (p.categoria || '').toLowerCase().includes('bebida');
+    const label = p.estoque <= 0 ? 'Esgotado' : (isBebida ? 'Adicionar ao carrinho' : 'Personalizar & Pedir 🍕');
+    const fn = isBebida ? `addToCart('${p.id}')` : `abrirPizzaCustomModal('${p.id}')`;
+    return `<button onclick="${fn}" ${p.estoque <= 0 ? 'disabled' : ''} style="width:100%;font-size:15px;padding:14px;${p.estoque <= 0 ? 'background:#3a2c26;color:#8a7862;cursor:not-allowed;border:none;border-radius:4px;' : 'background:var(--fogo);color:var(--carvao);border:none;border-radius:4px;cursor:pointer;font-weight:700;'}">${label}</button>`;
   }
+
+  // ===== PERSONALIZAÇÃO DE PIZZA (Meio a Meio & Bordas) =====
+  let currentCustomItem = null;
+  let customModoSabores = 1;
+
+  window.abrirPizzaCustomModal = function(itemId) {
+    const item = store.getItem(itemId);
+    if (!item) return;
+    if ((item.categoria || '').toLowerCase().includes('bebida')) {
+      store.addToCart(itemId, 1);
+      updateCartBadge();
+      showToast('Bebida adicionada ao carrinho! <a href="#" onclick="goToPage(\'carrinho\')" style="color:var(--fogo);font-weight:700;">Ver carrinho</a>');
+      return;
+    }
+    currentCustomItem = item;
+    customModoSabores = 1;
+    document.getElementById('customModalTitle').textContent = 'Personalizar ' + item.nome;
+    document.getElementById('btnSabor1').style.background = 'var(--fogo)';
+    document.getElementById('btnSabor1').style.color = 'var(--carvao)';
+    document.getElementById('btnSabor2').style.background = 'rgba(244,237,225,0.05)';
+    document.getElementById('btnSabor2').style.color = 'var(--creme)';
+    document.getElementById('segundoSaborContainer').style.display = 'none';
+    document.getElementById('bordaSelect').value = 'Tradicional';
+    document.getElementById('pizzaObsInput').value = '';
+
+    const pizzas = store.getItems().filter(i => i.ativo !== false && !(i.categoria || '').toLowerCase().includes('bebida') && i.id !== item.id);
+    const options = pizzas.map(p => `<option value="${p.id}" data-preco="${p.preco}">${escapeHtml(p.nome)} (R$ ${p.preco.toFixed(2).replace('.', ',')})</option>`).join('');
+    document.getElementById('segundoSaborSelect').innerHTML = options || `<option value="${item.id}" data-preco="${item.preco}">${escapeHtml(item.nome)}</option>`;
+
+    recalcularPrecoCustom();
+    document.getElementById('pizzaCustomModal').classList.add('active');
+  };
+
+  window.fecharPizzaCustomModal = function() {
+    document.getElementById('pizzaCustomModal').classList.remove('active');
+    currentCustomItem = null;
+  };
+
+  window.setSaboresModo = function(modo) {
+    customModoSabores = modo;
+    const btn1 = document.getElementById('btnSabor1');
+    const btn2 = document.getElementById('btnSabor2');
+    const container2 = document.getElementById('segundoSaborContainer');
+    if (modo === 1) {
+      btn1.style.background = 'var(--fogo)';
+      btn1.style.color = 'var(--carvao)';
+      btn2.style.background = 'rgba(244,237,225,0.05)';
+      btn2.style.color = 'var(--creme)';
+      container2.style.display = 'none';
+    } else {
+      btn2.style.background = 'var(--fogo)';
+      btn2.style.color = 'var(--carvao)';
+      btn1.style.background = 'rgba(244,237,225,0.05)';
+      btn1.style.color = 'var(--creme)';
+      container2.style.display = 'block';
+    }
+    recalcularPrecoCustom();
+  };
+
+  window.recalcularPrecoCustom = function() {
+    if (!currentCustomItem) return;
+    let basePrice = currentCustomItem.preco;
+    if (customModoSabores === 2) {
+      const select2 = document.getElementById('segundoSaborSelect');
+      const opt = select2?.options[select2.selectedIndex];
+      const p2 = opt ? parseFloat(opt.getAttribute('data-preco')) || basePrice : basePrice;
+      basePrice = Math.max(basePrice, p2);
+    }
+    const bordaOpt = document.getElementById('bordaSelect')?.selectedOptions[0];
+    const bordaPrice = bordaOpt ? parseFloat(bordaOpt.getAttribute('data-price')) || 0 : 0;
+    const total = basePrice + bordaPrice;
+    document.getElementById('customModalPrecoTotal').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  };
+
+  window.confirmarPizzaCustom = function() {
+    if (!currentCustomItem) return;
+    const borda = document.getElementById('bordaSelect')?.value || 'Tradicional';
+    const bordaPrice = parseFloat(document.getElementById('bordaSelect')?.selectedOptions[0]?.getAttribute('data-price') || '0');
+    const obs = document.getElementById('pizzaObsInput')?.value?.trim() || '';
+    
+    let nomeFinal = currentCustomItem.nome;
+    let precoFinal = currentCustomItem.preco + bordaPrice;
+
+    if (customModoSabores === 2) {
+      const select2 = document.getElementById('segundoSaborSelect');
+      const opt = select2?.options[select2.selectedIndex];
+      const sabor2Nome = opt ? opt.text.split(' (R$')[0] : '';
+      const p2 = opt ? parseFloat(opt.getAttribute('data-preco')) || currentCustomItem.preco : currentCustomItem.preco;
+      precoFinal = Math.max(currentCustomItem.preco, p2) + bordaPrice;
+      nomeFinal = `½ ${currentCustomItem.nome} + ½ ${sabor2Nome}`;
+    }
+
+    if (borda && borda !== 'Tradicional') {
+      nomeFinal += ` · ${borda}`;
+    }
+    if (obs) {
+      nomeFinal += ` (${obs})`;
+    }
+
+    const customItem = store.saveItem({
+      nome: nomeFinal,
+      categoria: currentCustomItem.categoria || 'Pizzas',
+      preco: precoFinal,
+      descricao: currentCustomItem.descricao || '',
+      foto: currentCustomItem.foto || '',
+      estoque: 999,
+      ativo: true
+    });
+
+    store.addToCart(customItem.id, 1);
+    updateCartBadge();
+    fecharPizzaCustomModal();
+    showToast('Pizza personalizada adicionada! <a href="#" onclick="goToPage(\'carrinho\')" style="color:var(--fogo);font-weight:700;">Ver carrinho</a>');
+  };
   async function renderCardapio() {
     const items = store.getItems().filter(i => i.ativo !== false);
     const cats = ['Todas', ...Array.from(new Set(items.map(i => i.categoria).filter(Boolean)))];
@@ -1340,6 +1519,35 @@ const nome = document.getElementById('clienteNome').value.trim();
     if (timerPedidos) { clearInterval(timerPedidos); timerPedidos = null; }
   }
 
+  // Sintetizador Web Audio API para chime de pedido na cozinha (sem arquivos externos)
+  let audioCtx = null;
+  let ultimoTotalPedidosRecebidos = 0;
+  function tocarChimeNovoPedido() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.setValueAtTime(880.00, now + 0.15); // A5
+      
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      osc.start(now);
+      osc.stop(now + 0.6);
+    } catch (e) { /* silencia se bloqueado pelo browser */ }
+  }
+
   async function renderAdminPedidos() {
     const ok = await buscarPedidosServidor();
     desenharAdminPedidos(ok);
@@ -1350,6 +1558,14 @@ const nome = document.getElementById('clienteNome').value.trim();
     const orders = pedidosServidor.length || servidorOk ? pedidosServidor : store.getOrders();
     const alvo = document.getElementById('pedidosList');
     if (!alvo) return;
+
+    // Alerta sonoro se houver novos pedidos aguardando preparo
+    const recebidos = orders.filter(o => o.status === 'recebido').length;
+    if (recebidos > 0 && recebidos > ultimoTotalPedidosRecebidos) {
+      tocarChimeNovoPedido();
+    }
+    ultimoTotalPedidosRecebidos = recebidos;
+
     if (!orders.length) {
       alvo.innerHTML = `<p style="text-align:center;padding:50px 0;color:#8a7862;">
         ${servidorOk ? 'Nenhum pedido ainda. Os pedidos dos clientes aparecem aqui automaticamente.' : '⚠️ Não foi possível falar com o servidor.'}
@@ -2171,6 +2387,13 @@ window.testPaymentConnection = async function() {
     if (gsapWin) { gsapWin.registerPlugin(ST); setupHome(); setupHero(); }
     setTimeout(killPreloader, 900);
   });
+
+  /* ---------- PWA Service Worker ---------- */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function() {});
+    });
+  }
 
 })();
 </script>

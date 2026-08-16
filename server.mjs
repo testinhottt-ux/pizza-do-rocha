@@ -232,15 +232,41 @@ function log(level, component, message, data = {}) {
   fs.appendFileSync(LOG_FILE, line + '\n');
 }
 
+// ── Rate Limiting em memória por IP ──
+const rateLimits = new Map();
+function verificarRateLimit(ip, chave, maxTentativas, janelaMs) {
+  const agora = Date.now();
+  const id = `${ip || 'local'}:${chave}`;
+  const registro = rateLimits.get(id) || { count: 0, expira: agora + janelaMs };
+  if (agora > registro.expira) {
+    registro.count = 0;
+    registro.expira = agora + janelaMs;
+  }
+  registro.count++;
+  rateLimits.set(id, registro);
+  return registro.count <= maxTentativas;
+}
+
+function aplicarSecurityHeaders(res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+}
+
 // ── MIME ──
 const MIME = {
   '.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css',
-  '.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg',
+  '.json':'application/json','.webmanifest':'application/manifest+json',
+  '.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg',
   '.gif':'image/gif','.svg':'image/svg+xml','.ico':'image/x-icon','.webp':'image/webp','.txt':'text/plain'
 };
 
 // ── Helpers ──
-function sendJson(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(obj)); }
+function sendJson(res, code, obj) {
+  aplicarSecurityHeaders(res);
+  res.writeHead(code, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(obj));
+}
 function readBody(req) {
   return new Promise((res, rej) => {
     let b = '';
@@ -263,6 +289,7 @@ function servirEstatico(req, res, caminho) {
   if (!abs.startsWith(__dirname)) { res.writeHead(403); res.end('Forbidden'); return; }
   fs.readFile(abs, (err, buf) => {
     if (err) { res.writeHead(404); res.end('Not Found'); return; }
+    aplicarSecurityHeaders(res);
     const ext = path.extname(abs).toLowerCase();
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(buf);
@@ -271,6 +298,8 @@ function servirEstatico(req, res, caminho) {
 
 // ── Endpoints /api ──
 async function handleApi(req, res, caminho) {
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || '127.0.0.1';
+
   // GET /api/config
   if (caminho === '/api/config' && req.method === 'GET') {
     const cfg = lerConfig();
@@ -295,8 +324,12 @@ async function handleApi(req, res, caminho) {
     log('INFO', 'ADMIN', 'Config salva no servidor', { infinitePayHandle: cfg.infinitePayHandle, whatsappNotif: cfg.whatsappNotif, modoSimulacao: cfg.modoSimulacao, modoLanding: cfg.modoLanding });
     return sendJson(res, 200, { ok: true, infinitePayHandle: cfg.infinitePayHandle, whatsappNotif: cfg.whatsappNotif, modoSimulacao: cfg.modoSimulacao, modoLanding: cfg.modoLanding });
   }
-  // POST /api/admin/login — a senha do painel é conferida no servidor, nunca no navegador
+  // POST /api/admin/login — a senha do painel é conferida no servidor com rate limit
   if (caminho === '/api/admin/login' && req.method === 'POST') {
+    if (!verificarRateLimit(clientIp, 'admin-login', 10, 5 * 60 * 1000)) {
+      log('WARN', 'SECURITY', 'Rate limit excedido em /api/admin/login', { ip: clientIp });
+      return sendJson(res, 429, { ok: false, error: 'Muitas tentativas. Aguarde 5 minutos.' });
+    }
     const body = await readBody(req);
     const senha = String(body.senha || '').trim();
     await new Promise(r => setTimeout(r, 350)); // atraso fixo desestimula força bruta

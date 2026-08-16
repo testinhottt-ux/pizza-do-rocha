@@ -181,6 +181,35 @@ describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
     }
     console.log(`   ✓ ${orders.length} pedidos, ordenados corretamente`);
   });
+
+  test('✅ Personalização: Pizza Meio a Meio e Borda Recheada', () => {
+    localStorage.clear();
+    const pizza1 = store.saveItem({ nome: 'Portuguesa Gigante', categoria: 'Pizzas', preco: 59.99, estoque: 10, ativo: true });
+    const pizza2 = store.saveItem({ nome: 'Calabresa Gigante', categoria: 'Pizzas', preco: 54.99, estoque: 10, ativo: true });
+    
+    // Meio a meio cobra pelo maior valor (59.99) + Borda Catupiry (8.00) = 67.99
+    const precoFinal = Math.max(pizza1.preco, pizza2.preco) + 8.00;
+    const customPizza = store.saveItem({
+      nome: `½ ${pizza1.nome} + ½ ${pizza2.nome} · Borda Catupiry Original`,
+      categoria: 'Pizzas',
+      preco: precoFinal,
+      estoque: 999,
+      ativo: true
+    });
+
+    store.addToCart(customPizza.id, 1);
+    assert.equal(store.cartCount(), 1);
+    assert.equal(store.cartTotal(), 67.99);
+
+    const order = store.createOrder({
+      cliente: { nome: 'Cliente Meio a Meio', telefone: '99999999', endereco: 'Rua das Pizzas, 100' },
+      pagamento: { metodo: 'pix', status: 'pendente' }
+    });
+
+    assert.equal(order.total, 67.99);
+    assert.ok(order.itens[0].nome.includes('½ Portuguesa'));
+    console.log(`   ✓ Pizza Meio a Meio com Borda: R$ ${order.total.toFixed(2)}`);
+  });
 });
 
 console.log('\n✅ SUITE COMPLETA FINALIZADA\n');

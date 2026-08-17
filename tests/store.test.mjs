@@ -213,3 +213,25 @@ test('FOTOS aponta para arquivos dentro de images/', () => {
   assert.ok(store.FOTOS.hero.startsWith('images/'));
   assert.equal(store.FOTOS.galeria.length, 6);
 });
+
+test('saveItem armazena e recupera foto customizada do produto', () => {
+  const customFoto = 'data:image/jpeg;base64,test_custom_photo_data';
+  const item = store.saveItem({
+    nome: 'Pizza Trufada Especial',
+    categoria: 'Especiais',
+    preco: 79.90,
+    descricao: 'Trufas negras com queijo brie',
+    estoque: 20,
+    foto: customFoto,
+    ativo: true,
+  });
+
+  assert.ok(item.id);
+  assert.equal(item.foto, customFoto);
+
+  const found = store.getItems().find(i => i.id === item.id);
+  assert.ok(found);
+  assert.equal(found.foto, customFoto);
+  assert.equal(store.photoFor(found.nome, found.categoria, found.foto), customFoto);
+});
+

@@ -104,20 +104,24 @@ describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
   test('✅ Fluxo Admin: CRUD + Estoque + Status', () => {
     localStorage.clear();
 
-    // 1. Criar pizza
+    // 1. Criar pizza com foto personalizada
     const pizza = store.saveItem({
       nome: 'Calabresa Admin', categoria: 'Tradicionais', preco: 45,
-      descricao: 'Calabresa com cebola', estoque: 10, ativo: true
+      descricao: 'Calabresa com cebola', estoque: 10, ativo: true,
+      foto: 'images/pizza-calabresa.jpg'
     });
     assert.ok(pizza.id, 'Pizza criada');
-    console.log(`   ✓ Pizza criada: ${pizza.nome}`);
+    assert.equal(pizza.foto, 'images/pizza-calabresa.jpg', 'Foto deve ser salva');
+    console.log(`   ✓ Pizza criada com foto: ${pizza.nome} (${pizza.foto})`);
 
     // 2. Editar
     pizza.preco = 48;
+    pizza.foto = 'data:image/jpeg;base64,nova_foto_preview';
     store.saveItem(pizza);
     const updated = store.getItems().find(i => i.id === pizza.id);
     assert.equal(updated.preco, 48, 'Preço deve ser 48');
-    console.log(`   ✓ Preço atualizado: 45 → 48`);
+    assert.equal(updated.foto, 'data:image/jpeg;base64,nova_foto_preview', 'Foto atualizada');
+    console.log(`   ✓ Preço e foto atualizados: 45 → 48, foto personalizada preservada`);
 
     // 3. Ajustar estoque
     store.adjustStock(pizza.id, -3);

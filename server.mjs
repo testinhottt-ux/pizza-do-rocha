@@ -330,7 +330,11 @@ async function handleApi(req, res, caminho) {
     if (typeof body.infinitePayHandle === 'string' && /^\$?[A-Za-z0-9_.-]{3,80}$/.test(body.infinitePayHandle.trim())) patch.infinitePayHandle = body.infinitePayHandle.trim();
     if (typeof body.modoSimulacao === 'boolean') patch.modoSimulacao = body.modoSimulacao;
     if (typeof body.modoLanding === 'boolean') patch.modoLanding = body.modoLanding;
-    if (typeof body.whatsapp === 'string' && /^\d{10,15}$/.test(body.whatsapp)) patch.whatsappNotif = body.whatsapp;
+    const waCandidate = typeof body.whatsappNotif === 'string' ? body.whatsappNotif : (typeof body.whatsapp === 'string' ? body.whatsapp : null);
+    if (waCandidate) {
+      const digits = waCandidate.replace(/\D/g, '');
+      if (/^\d{10,15}$/.test(digits)) patch.whatsappNotif = digits;
+    }
     const cfg = salvarConfig(patch);
     log('INFO', 'ADMIN', 'Config salva no servidor', { infinitePayHandle: cfg.infinitePayHandle, whatsappNotif: cfg.whatsappNotif, modoSimulacao: cfg.modoSimulacao, modoLanding: cfg.modoLanding });
     return sendJson(res, 200, { ok: true, infinitePayHandle: cfg.infinitePayHandle, whatsappNotif: cfg.whatsappNotif, modoSimulacao: cfg.modoSimulacao, modoLanding: cfg.modoLanding });

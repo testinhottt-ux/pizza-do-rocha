@@ -1,8 +1,36 @@
-# Progresso — Pizzaria do Rocha v2.5.0 (SERVER STABILITY + PORT RECOVERY + FULL TEST SUITE)
+# Progresso — Pizzaria do Rocha v2.6.0 (RESPONSIVE ADMIN + PRODUCT PHOTOS + INLINE WHATSAPP SAVE)
 
-**Status**: ✅ **COMPLETE & RUNNING** — Servidor robusto, auto-recuperação de portas, 83 testes passando  
-**Data**: 2026-08-16  
-**Testes**: 83/83 ✅ | Unitários (19/19), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+**Status**: ✅ **COMPLETE & RUNNING** — Área administrativa 100% responsiva em mobile/tablet/desktop, cadastro com foto e compressor canvas, botão salvar dedicado para celular de notificações, 84 testes passando  
+**Data**: 2026-08-17  
+**Testes**: 84/84 ✅ | Unitários (20/20), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+
+---
+
+## 🎯 v2.6.0 — RESPONSIVIDADE DO PAINEL ADMIN, CADASTRO COM FOTOS E BOTÃO SALVAR WHATSAPP
+
+### ✅ ÁREA ADMINISTRATIVA 100% RESPONSIVA
+- **Layout Adaptativo**: Substituído grid inline fixo (`260px 1fr`) por classes semânticas (`.admin-layout`, `.admin-sidebar`, `.admin-main`, etc.).
+- **Mobile & Tablet (< 880px)**:
+  - Header superior compacto com logo e botão de saída rápido.
+  - Barra de navegação por abas com rolagem horizontal suave (`overflow-x: auto;` e `-webkit-overflow-scrolling: touch;`).
+  - Cards do cardápio e estoque empilhados responsivamente com thumbnail de imagem, preços destacados e botões touch-friendly.
+  - Grid de relatórios adaptativo (`repeat(auto-fit, minmax(200px, 1fr))`).
+  - Ajuste de padding de tela cheia sem overflow horizontal.
+
+### ✅ FOTOS NO CADASTRO E EDIÇÃO DE PRODUTOS
+- **Seletor de Foto Multi-opção**:
+  - Upload de arquivo do celular/computador com compressão e redimensionamento automático via HTML5 Canvas (máx. 600px, JPEG 0.85) em DataURL compacto (~20-40KB) sem estourar o localStorage.
+  - Inserção de link/URL direta de imagem.
+  - Chips rápidos com sugestões pré-definidas da pizzaria (Margherita, Calabresa, Portuguesa, Pepperoni, Cola, Guaraná).
+  - Preview instantâneo da foto com botão de limpeza.
+- **Persistência Completa**:
+  - Campo `foto` salvo e recuperado em `store.saveItem(item)` e `editAdminItem(id)`.
+  - Exibição da foto personalizada no painel admin, cardápio, carrinho e checkout.
+
+### ✅ BOTÃO SALVAR CELULAR DE NOTIFICAÇÕES (INLINE)
+- **Botão Dedicado ao lado do Campo**:
+  - Botão `💾 Salvar Celular` posicionado inline ao lado do input de WhatsApp.
+  - Função assíncrona `salvarNumeroWhatsApp()` que valida o número (10 a 15 dígitos com DDD), envia para `POST /api/config`, atualiza o estado local, reflete nos links da página (`wa.me`) e dá feedback visual imediato ("✅ Salvo!").
 
 ---
 

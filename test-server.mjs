@@ -39,10 +39,10 @@ try {
   const wh = await req('POST', '/api/webhook', { event: 'PAYMENT_RECEIVED', payment: { id: 'pay_teste' } });
   ok('webhook aceito', wh.status === 200, JSON.stringify(wh.body));
 
-  // Modos de operação (simulação + landing) persistem
-  await req('POST', '/api/config', { modoSimulacao: true, modoLanding: true });
+  // Modos de operação e número de WhatsApp persistem
+  await req('POST', '/api/config', { modoSimulacao: true, modoLanding: true, whatsappNotif: '5531996678280' });
   const cfg2 = await req('GET', '/api/config');
-  ok('modoSimulacao/modoLanding salvos', cfg2.body?.modoSimulacao === true && cfg2.body?.modoLanding === true, JSON.stringify(cfg2.body));
+  ok('modoSimulacao/modoLanding/whatsappNotif salvos', cfg2.body?.modoSimulacao === true && cfg2.body?.modoLanding === true && cfg2.body?.whatsappNotif === '5531996678280', JSON.stringify(cfg2.body));
   await req('POST', '/api/config', { modoSimulacao: true, modoLanding: false });
 
   // Cobrança simulada (PIX e Cartão) — fluxo completo sem cobrança real

@@ -60,6 +60,21 @@ BACKEND SERVER (server.mjs)
      ├─ GET /api/pedidos → Listagem autenticada para o dono (header x-admin-pass)
      ├─ POST /api/pedidos/:id/status → Mudança de status (recebido → preparando → forno → saiu_entrega → entregue)
      └─ GET /api/pedidos/:id → Acompanhamento público seguro (sem vazar endereço)
+
+PAINEL ADMINISTRATIVO & GESTÃO (index.html #adminPage)
+│
+├─── LAYOUT RESPONSIVO (.admin-layout, .admin-sidebar, .admin-main)
+│    ├─ Desktop: Sidebar lateral fixa 260px com abas verticais
+│    └─ Mobile/Tablet (≤ 880px): Header compacto + barra de abas com scroll horizontal
+│
+├─── GESTÃO DE PRODUTOS & FOTOS
+│    ├─ Upload de arquivo → FileReader → HTML5 Canvas (max 600px, JPEG 0.85) → DataURL
+│    ├─ Inserção de link/URL direta ou presets (chips rápidos)
+│    └─ Persistência em store.saveItem() com fallback determinístico de fotos
+│
+└─── CONFIGURAÇÕES & WHATSAPP
+     ├─ Botão inline "Salvar Celular" → POST /api/config { whatsapp, whatsappNotif }
+     └─ Sincronização em tempo real de links wa.me na vitrine
 ```
 
 ---

@@ -37,14 +37,14 @@ export const CONTATO = {
 export const FOTOS = {
   hero: 'images/hero-forno.jpg',
   historia: 'images/historia-pizzaiolo.jpg',
-  generica: 'images/pizza-generica.jpg',
+  generica: 'images/pizza-mussarela-artesanal.jpg',
   galeria: [
     'images/pizza-margherita.jpg',
-    'images/pizza-pepperoni.jpg',
     'images/pizza-calabresa.jpg',
-    'images/pizza-quatro.jpg',
     'images/pizza-portuguesa.jpg',
     'images/pizza-frango.jpg',
+    'images/pizza-mussarela-artesanal.jpg',
+    'images/pizza-especial-rocha.jpg',
   ],
 };
 
@@ -52,7 +52,7 @@ const FOTO_KEYWORDS = [
   [/marg|mussar|muçar|queijo|napolit/i, 'images/pizza-margherita.jpg'],
   [/pepper|peperoni|pepperoni/i, 'images/pizza-pepperoni.jpg'],
   [/calabr|lingu|bacon/i, 'images/pizza-calabresa.jpg'],
-  [/quatro|4 queijo|4queijo|especial|premium/i, 'images/pizza-quatro.jpg'],
+  [/quatro|4 queijo|4queijo|especial|premium/i, 'images/pizza-especial-rocha.jpg'],
   [/portug|lombo|presunto|ovo/i, 'images/pizza-portuguesa.jpg'],
   [/frango|catupiry|chicken/i, 'images/pizza-frango.jpg'],
   // Bebidas (imagens ilustrativas em ./images, sempre marcadas como "Ilustrativa" na UI)
@@ -79,8 +79,8 @@ function seedItems() {
     ['Portuguesa (à moda) · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho, presunto, cebola, pimentão, bacon, tomate, ovos, muçarela, queijo parmesão ralado, azeitona e orégano.', 'images/pizza-portuguesa.jpg'],
     ['Calabresa · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Molho, frango desfiado, muçarela, calabresa desfiada, cebola, queijo parmesão ralado e orégano.', 'images/pizza-calabresa.jpg'],
     ['Calabresa · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho, frango desfiado, muçarela, calabresa desfiada, cebola, queijo parmesão ralado e orégano.', 'images/pizza-calabresa.jpg'],
-    ['Presunto com muçarela · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', 'images/pizza-generica.jpg'],
-    ['Presunto com muçarela · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', 'images/pizza-generica.jpg'],
+    ['Presunto com muçarela · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', 'images/pizza-mussarela-artesanal.jpg'],
+    ['Presunto com muçarela · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', 'images/pizza-mussarela-artesanal.jpg'],
     ['Marguerita · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', 'images/pizza-margherita.jpg'],
     ['Marguerita · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', 'images/pizza-margherita.jpg'],
   ];

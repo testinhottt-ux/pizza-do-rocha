@@ -422,25 +422,63 @@ button { font-family: 'Work Sans', sans-serif; }
     display: none;
   }
 
+  /* Botão de saída no topo mobile */
   .admin-logout-btn-mobile {
     display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(232, 67, 47, 0.15);
+    border: 1px solid var(--fogo);
+    color: var(--fogo);
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 700;
   }
 
+  /* Grid com TODOS os 5 botões 100% visíveis na tela */
   .admin-nav {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 8px;
-    padding: 4px 0 8px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    overflow-x: visible !important;
+    padding: 4px 0 0 !important;
+  }
+
+  @media (max-width: 480px) {
+    .admin-nav {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 6px !important;
+    }
+    .admin-nav > button:last-child {
+      grid-column: span 2 !important;
+    }
   }
 
   .admin-tab-btn {
     white-space: nowrap;
-    width: auto;
-    padding: 9px 14px;
-    font-size: 13px;
-    flex-shrink: 0;
+    width: 100% !important;
+    padding: 11px 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+    background: rgba(244, 237, 225, 0.06) !important;
+    border: 1px solid rgba(244, 237, 225, 0.14) !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-tab-btn.active {
+    background: var(--fogo) !important;
+    color: #fff !important;
+    border-color: var(--fogo) !important;
+    box-shadow: 0 4px 12px rgba(232, 67, 47, 0.35) !important;
   }
 
   .admin-main {

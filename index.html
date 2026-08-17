@@ -2109,69 +2109,6 @@ const nome = document.getElementById('clienteNome').value.trim();
     document.getElementById('relTicket').textContent = 'R$ ' + ticket.toFixed(2).replace('.', ',');
   }
 
-  window.submitAdminForm = function() {
-    const nome = document.getElementById('formNome').value.trim();
-    const categoria = document.getElementById('formCategoria').value.trim() || 'Tradicionais';
-    const preco = parseFloat(document.getElementById('formPreco').value) || 0;
-    const descricao = document.getElementById('formDescricao').value.trim();
-    const estoque = parseInt(document.getElementById('formEstoque').value) || 0;
-
-    if (!nome || !preco) {
-      showToast('Preencha nome e preço!');
-      return;
-    }
-
-    const item = {
-      id: editingItemId,
-      nome, categoria, preco, descricao, estoque, ativo: true
-    };
-
-    store.saveItem(item);
-    clearAdminForm();
-    renderAdminCardapio();
-    showToast(editingItemId ? 'Produto atualizado!' : 'Produto adicionado!');
-  };
-
-  window.editAdminItem = function(id) {
-    const item = store.getItems().find(i => i.id === id);
-    if (!item) return;
-
-    editingItemId = id;
-    document.getElementById('formNome').value = item.nome;
-    document.getElementById('formCategoria').value = item.categoria;
-    document.getElementById('formPreco').value = item.preco;
-    document.getElementById('formDescricao').value = item.descricao || '';
-    document.getElementById('formEstoque').value = item.estoque || 0;
-    document.getElementById('formTitle').textContent = 'Editar produto';
-    document.getElementById('submitBtnLabel').textContent = 'Salvar alterações';
-    document.getElementById('cancelEditBtn').style.display = 'inline';
-  };
-
-  window.cancelAdminEdit = function() {
-    clearAdminForm();
-  };
-
-  window.deleteAdminItem = function(id) {
-    if (confirm('Tem certeza?')) {
-      store.deleteItem(id);
-      renderAdminCardapio();
-      showToast('Produto deletado!');
-    }
-  };
-
-  window.toggleAdminItemAtivo = function(id) {
-    const item = store.getItems().find(i => i.id === id);
-    if (item) {
-      store.saveItem({ ...item, ativo: !item.ativo });
-      renderAdminCardapio();
-    }
-  };
-
-  window.adjustStockAdmin = function(id, delta) {
-    store.adjustStock(id, delta);
-    renderAdminEstoque();
-  };
-
   window.advanceOrderStatus = async function(id, status) {
     // O servidor é a fonte de verdade; o local só acompanha quando o pedido existe nele
     let order = pedidosServidor.find(o => o.id === id) || store.getOrder(id);
@@ -2199,18 +2136,6 @@ const nome = document.getElementById('clienteNome').value.trim();
       }
     } catch (e) { /* falha silenciosa do WhatsApp */ }
   };
-
-  function clearAdminForm() {
-    editingItemId = null;
-    document.getElementById('formNome').value = '';
-    document.getElementById('formCategoria').value = '';
-    document.getElementById('formPreco').value = '';
-    document.getElementById('formDescricao').value = '';
-    document.getElementById('formEstoque').value = '';
-    document.getElementById('formTitle').textContent = 'Novo produto';
-    document.getElementById('submitBtnLabel').textContent = 'Adicionar produto';
-    document.getElementById('cancelEditBtn').style.display = 'none';
-  }
 
   // ===== UTILS =====
   function escapeHtml(text) {

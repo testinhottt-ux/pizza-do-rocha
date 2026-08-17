@@ -88,6 +88,7 @@ function seedItems() {
     id: 'propaganda_' + i,
     nome, categoria, preco, descricao, foto,
     estoque: 999, ativo: true,
+    destaque: i === 0 || i === 1 || i === 3, // Destaques iniciais da Home
   }));
 }
 
@@ -103,6 +104,7 @@ function seedBebidas() {
     id: 'bebida_propaganda_' + i,
     nome, categoria, preco, descricao, foto,
     estoque, ativo: true,
+    destaque: false,
   }));
 }
 
@@ -141,11 +143,36 @@ function uid(prefix) {
 // ---- Itens de cardápio ----
 export function getItems() { return load().items; }
 
+export function getItem(id) {
+  return getItems().find((i) => i.id === id) || null;
+}
+
+export function getDestaques() {
+  const items = getItems().filter((i) => i.ativo !== false);
+  const marcados = items.filter((i) => i.destaque === true);
+  return marcados.length > 0 ? marcados : items.slice(0, 3);
+}
+
+export function toggleDestaque(id) {
+  const db = load();
+  const item = db.items.find((i) => i.id === id);
+  if (item) {
+    item.destaque = !item.destaque;
+    save(db);
+  }
+  return item;
+}
+
 export function saveItem(item) {
   const db = load();
   if (item.id) {
     const idx = db.items.findIndex((i) => i.id === item.id);
-    if (idx >= 0) db.items[idx] = item; else db.items.push(item);
+    if (idx >= 0) {
+      const anterior = db.items[idx];
+      db.items[idx] = { ...anterior, ...item };
+    } else {
+      db.items.push(item);
+    }
   } else {
     item.id = uid('item');
     db.items.push(item);

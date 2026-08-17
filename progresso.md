@@ -1,8 +1,25 @@
-# Progresso — Pizzaria do Rocha v2.6.0 (RESPONSIVE ADMIN + PRODUCT PHOTOS + INLINE WHATSAPP SAVE)
+# Progresso — Pizzaria do Rocha v2.7.0 (HOME ADS / DESTAQUES MANAGER + AWWWARDS VITRINE)
 
-**Status**: ✅ **COMPLETE & RUNNING** — Área administrativa 100% responsiva em mobile/tablet/desktop, cadastro com foto e compressor canvas, botão salvar dedicado para celular de notificações, 84 testes passando  
+**Status**: ✅ **COMPLETE & RUNNING** — Seleção dinâmica de anúncios da Página Inicial no Cardápio Admin com 1 clique, vitrine Awwwards interativa na Home, switch de destaque no cadastro, 85 testes passando  
 **Data**: 2026-08-17  
-**Testes**: 84/84 ✅ | Unitários (20/20), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+**Testes**: 85/85 ✅ | Unitários (21/21), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+
+---
+
+## 🎯 v2.7.0 — GESTÃO DE ANÚNCIOS / DESTAQUES DA PÁGINA INICIAL (AWWWARDS)
+
+### ✅ SELEÇÃO DINÂMICA DE ANÚNCIOS NO PAINEL ADMIN
+- **Controle 1-Click no Cardápio**:
+  - Botão de alternância instantânea (`⭐ Na Home` / `☆ + Na Home`) na lista de produtos do painel administrativo.
+  - Barra de status no topo do cardápio com contador dinâmico de anúncios ativos na Home (`⭐ X nos anúncios da Página Inicial`).
+  - Switch premium no formulário de cadastro/edição de produto (`[⭐ Exibir nos Anúncios / Destaques da Página Inicial]`).
+- **Camada de Dados (`store.js`)**:
+  - Propriedade `destaque: boolean` nos produtos.
+  - Funções `getDestaques()` e `toggleDestaque(id)` com persistência e re-renderização em tempo real da Home.
+
+### ✅ VITRINE DE ANÚNCIOS & OFERTAS NA HOME (DESIGN AWWWARDS)
+- **Seção "🔥 ANÚNCIOS & OFERTAS ESPECIAIS · DESTAQUES DA CASA"**:
+  - Cards com micro-interações, hover 3D suave, badge holográfica `⭐ Destaque`, tipografia refinada e botão de ação direta (*Personalizar & Pedir* ou *Adicionar Bebida*).
 
 ---
 

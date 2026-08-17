@@ -199,9 +199,12 @@
   </section>
 
   <section style="padding:130px 64px;background:var(--carvao);" class="pad">
-    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:52px;flex-wrap:wrap;gap:20px;">
-       <h2 style="font-size:clamp(48px, 12vw, 72px);margin:0;">CARDÁPIO DA PROPAGANDA</h2>
-      <a href="#" onclick="goToPage('cardapio')" style="font-weight:700;font-size:clamp(14px, 2.5vw, 16px);color:var(--fogo);border-bottom:2px solid var(--fogo);padding-bottom:4px;">Ver cardápio completo →</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:52px;flex-wrap:wrap;gap:20px;">
+      <div>
+        <div style="font-size:14px;font-weight:800;letter-spacing:3px;color:var(--fogo);margin-bottom:12px;">🔥 ANÚNCIOS & OFERTAS ESPECIAIS</div>
+        <h2 style="font-size:clamp(40px, 9vw, 68px);margin:0;color:var(--creme);line-height:1.05;">DESTAQUES DA CASA</h2>
+      </div>
+      <a href="#" onclick="goToPage('cardapio')" style="font-weight:700;font-size:clamp(14px, 2.5vw, 16px);color:var(--fogo);border-bottom:2px solid var(--fogo);padding-bottom:4px;display:inline-flex;align-items:center;gap:6px;">Ver cardápio completo →</a>
     </div>
     <div class="grid-3" id="featuredProducts"></div>
   </section>
@@ -521,6 +524,21 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- SEÇÃO DE ANÚNCIO / DESTAQUE NA PÁGINA INICIAL -->
+          <div style="background: #faf6f0; border: 1px solid #ebdccb; border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">⭐</span>
+              <div>
+                <div style="font-weight: 700; font-size: 14px; color: var(--carvao);">Exibir nos Anúncios / Destaques da Página Inicial</div>
+                <div style="font-size: 12px; color: #8a7862;">Destaca este produto com visual premium no banner principal de promoções da Home</div>
+              </div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px; cursor: pointer; flex-shrink: 0;">
+              <input type="checkbox" id="formDestaque" style="opacity: 0; width: 0; height: 0;">
+              <span class="admin-switch-slider"></span>
+            </label>
           </div>
 
           <div style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
@@ -951,27 +969,45 @@ currentPage = page;
 
   // ===== HOME PAGE =====
   async function renderHome() {
-    const featured = store.getItems().filter(i => i.ativo !== false).slice(0, 3);
-    const html = featured.map(p => `
-      <div class="card" style="cursor:pointer;display:flex;flex-direction:column;height:100%;" onclick="goToPage('cardapio')">
-        <div class="thumb">
-          <img src="${store.photoFor(p.nome, p.categoria, p.foto)}" alt="${escapeHtml(p.nome)}" onerror="this.src='images/pizza-generica.jpg'">
-          <span class="ilustra">Destaque</span>
-        </div>
-        <div style="padding:22px;display:flex;flex-direction:column;flex:1;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
-            <span style="font-size:22px;font-weight:700;color:var(--creme);line-height:1.2;">${escapeHtml(p.nome)}</span>
-            <span style="font-size:20px;color:var(--fogo);font-weight:800;white-space:nowrap;">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
+    const featured = store.getDestaques();
+    const container = document.getElementById('featuredProducts');
+    if (!container) return;
+
+    if (!featured || featured.length === 0) {
+      container.innerHTML = '<p style="color:#8a7862;grid-column:1/-1;text-align:center;padding:40px 0;">Nenhum anúncio em destaque no momento. Acesse o cardápio completo!</p>';
+      return;
+    }
+
+    const html = featured.map(p => {
+      const isBebida = (p.categoria || '').toLowerCase().includes('bebida');
+      const actionFn = isBebida ? `addToCart('${p.id}')` : `abrirPizzaCustomModal('${p.id}')`;
+      const btnText = isBebida ? 'Adicionar ao Carrinho 🥤' : 'Personalizar & Pedir 🍕';
+      const fotoUrl = store.photoFor(p.nome, p.categoria, p.foto);
+
+      return `
+        <div class="anuncio-home-card" data-reveal>
+          <div class="thumb" style="position:relative;width:100%;height:240px;overflow:hidden;background:#201714;">
+            <span class="anuncio-badge">⭐ Destaque</span>
+            <img src="${fotoUrl}" alt="${escapeHtml(p.nome)}" onerror="this.src='images/pizza-generica.jpg'" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);">
           </div>
-          <p style="font-size:14px;color:var(--areia);line-height:1.6;margin:0 0 20px;flex:1;">${escapeHtml(p.descricao || '')}</p>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px;border-top:1px solid rgba(252,248,242,0.06);">
-            <span style="font-size:13px;font-weight:700;color:var(--fogo);">Personalizar e Pedir</span>
-            <span style="font-size:14px;color:var(--fogo);">→</span>
+          <div style="padding:22px;display:flex;flex-direction:column;flex:1;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
+              <span style="font-size:21px;font-weight:700;color:var(--creme);line-height:1.2;">${escapeHtml(p.nome)}</span>
+              <span style="font-size:20px;color:var(--fogo);font-weight:800;white-space:nowrap;">R$ ${p.preco.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <div style="font-size:12px;color:var(--fogo);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">${escapeHtml(p.categoria || 'Tradicionais')}</div>
+            <p style="font-size:14px;color:var(--areia);line-height:1.6;margin:0 0 20px;flex:1;">${escapeHtml(p.descricao || '')}</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px;border-top:1px solid rgba(252,248,242,0.06);gap:10px;">
+              <button onclick="${actionFn}" style="width:100%;padding:13px;background:var(--fogo);color:var(--carvao);border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:transform 0.2s;box-shadow:0 4px 14px rgba(232,67,47,0.35);">
+                ${btnText}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
-    document.getElementById('featuredProducts').innerHTML = html;
+      `;
+    }).join('');
+
+    container.innerHTML = html;
   }
 
   // ===== CARDÁPIO PAGE =====
@@ -1617,13 +1653,30 @@ const nome = document.getElementById('clienteNome').value.trim();
         return;
       }
 
-      const html = items.map(it => {
+      const totalDestaques = items.filter(i => i.destaque === true).length;
+      const headerBar = `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: #faf6f0; border-bottom: 1px solid #e5dac9; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--carvao);">
+            Total: <strong>${items.length}</strong> produtos
+          </div>
+          <div style="background: #fff8e1; color: #b45309; border: 1px solid #fde68a; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            ⭐ <span>${totalDestaques} nos anúncios da Página Inicial</span>
+          </div>
+        </div>
+      `;
+
+      const rows = items.map(it => {
         const fotoSrc = store.photoFor(it.nome, it.categoria, it.foto);
         const precoFormatado = it.preco.toFixed(2).replace('.', ',');
         const estoqueClass = it.estoque <= 0 ? 'color:#c0392b; font-weight:700;' : 'color:#2e7d32; font-weight:600;';
         const statusBadge = it.ativo === false ? 
           '<span style="background:#f0e9df; color:#8a7862; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:700;">Inativo</span>' : 
           '<span style="background:#e8f5e9; color:#2e7d32; padding:4px 8px; border-radius:4px; font-size:12px; font-weight:700;">Ativo</span>';
+
+        const isDestaque = it.destaque === true;
+        const destaqueBtn = isDestaque ?
+          `<button onclick="toggleAdminItemDestaque('${it.id}')" style="background: #fff8e1; border: 1px solid #f59e0b; color: #b45309; border-radius: 6px; padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Clique para remover dos anúncios da Home">⭐ Na Home</button>` :
+          `<button onclick="toggleAdminItemDestaque('${it.id}')" style="background: #fff; border: 1px solid #d9cbb3; color: #6b5c4d; border-radius: 6px; padding: 7px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Clique para exibir nos anúncios da Home">☆ + Na Home</button>`;
 
         return `
           <div class="admin-cardapio-row">
@@ -1634,10 +1687,11 @@ const nome = document.getElementById('clienteNome').value.trim();
                 <div style="font-size: 13px; color: #8a7862;">${escapeHtml(it.categoria || '')}</div>
               </div>
             </div>
-            <div class="admin-cardapio-row-details" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div class="admin-cardapio-row-details" style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
               <div style="font-weight: 700; font-size: 16px; color: var(--fogo); min-width: 80px;">R$ ${precoFormatado}</div>
               <div style="font-size: 13px; ${estoqueClass} min-width: 70px;">${it.estoque <= 0 ? 'Esgotado' : `${it.estoque} un.`}</div>
               <div>${statusBadge}</div>
+              <div>${destaqueBtn}</div>
               <div style="display: flex; gap: 8px; align-items: center;">
                 <button onclick="toggleAdminItemAtivo('${it.id}')" style="background: #fff; border: 1px solid #d9cbb3; border-radius: 6px; padding: 7px 12px; font-size: 13px; cursor: pointer; font-weight: 600;">${it.ativo === false ? 'Ativar' : 'Desativar'}</button>
                 <button onclick="editAdminItem('${it.id}')" style="background: #fbf0ee; border: 1px solid rgba(232,67,47,0.3); color: var(--fogo); border-radius: 6px; padding: 7px 12px; font-size: 13px; cursor: pointer; font-weight: 700;">✏️ Editar</button>
@@ -1648,7 +1702,7 @@ const nome = document.getElementById('clienteNome').value.trim();
         `;
       }).join('');
 
-      alvo.innerHTML = html;
+      alvo.innerHTML = headerBar + rows;
     }
 
     function renderAdminEstoque() {
@@ -1747,6 +1801,13 @@ const nome = document.getElementById('clienteNome').value.trim();
       }
     };
 
+    window.toggleAdminItemDestaque = function(id) {
+      const item = store.toggleDestaque(id);
+      renderAdminCardapio();
+      renderHome();
+      showToast(item?.destaque ? '⭐ Item adicionado aos anúncios da Página Inicial!' : 'Item removido dos anúncios da Página Inicial.');
+    };
+
     window.submitAdminForm = function() {
       const nome = document.getElementById('formNome').value.trim();
       const categoria = document.getElementById('formCategoria').value.trim() || 'Tradicionais';
@@ -1754,6 +1815,7 @@ const nome = document.getElementById('clienteNome').value.trim();
       const descricao = document.getElementById('formDescricao').value.trim();
       const estoque = parseInt(document.getElementById('formEstoque').value) || 0;
       const foto = (currentFormFoto || document.getElementById('formFotoUrl')?.value?.trim() || '').trim();
+      const destaque = document.getElementById('formDestaque')?.checked || false;
 
       if (!nome || !preco) {
         showToast('Preencha nome e preço!');
@@ -1762,12 +1824,13 @@ const nome = document.getElementById('clienteNome').value.trim();
 
       const item = {
         id: editingItemId,
-        nome, categoria, preco, descricao, estoque, foto, ativo: true
+        nome, categoria, preco, descricao, estoque, foto, destaque, ativo: true
       };
 
       store.saveItem(item);
       clearAdminForm();
       renderAdminCardapio();
+      renderHome();
       showToast(editingItemId ? 'Produto atualizado!' : 'Produto adicionado!');
     };
 
@@ -1782,6 +1845,9 @@ const nome = document.getElementById('clienteNome').value.trim();
       document.getElementById('formDescricao').value = item.descricao || '';
       document.getElementById('formEstoque').value = item.estoque || 0;
       
+      const checkDestaque = document.getElementById('formDestaque');
+      if (checkDestaque) checkDestaque.checked = item.destaque === true;
+
       currentFormFoto = item.foto || '';
       const urlInput = document.getElementById('formFotoUrl');
       if (urlInput) urlInput.value = item.foto || '';
@@ -1802,6 +1868,7 @@ const nome = document.getElementById('clienteNome').value.trim();
       if (confirm('Tem certeza?')) {
         store.deleteItem(id);
         renderAdminCardapio();
+        renderHome();
         showToast('Produto deletado!');
       }
     };
@@ -1811,6 +1878,7 @@ const nome = document.getElementById('clienteNome').value.trim();
       if (item) {
         store.saveItem({ ...item, ativo: !item.ativo });
         renderAdminCardapio();
+        renderHome();
       }
     };
 
@@ -1827,6 +1895,8 @@ const nome = document.getElementById('clienteNome').value.trim();
       document.getElementById('formPreco').value = '';
       document.getElementById('formDescricao').value = '';
       document.getElementById('formEstoque').value = '';
+      const checkDestaque = document.getElementById('formDestaque');
+      if (checkDestaque) checkDestaque.checked = false;
       const urlInput = document.getElementById('formFotoUrl');
       const fileInput = document.getElementById('formFotoFileInput');
       if (urlInput) urlInput.value = '';

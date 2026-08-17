@@ -223,15 +223,36 @@ test('saveItem armazena e recupera foto customizada do produto', () => {
     descricao: 'Trufas negras com queijo brie',
     estoque: 20,
     foto: customFoto,
+    destaque: true,
     ativo: true,
   });
 
   assert.ok(item.id);
   assert.equal(item.foto, customFoto);
+  assert.equal(item.destaque, true);
 
   const found = store.getItems().find(i => i.id === item.id);
   assert.ok(found);
   assert.equal(found.foto, customFoto);
+  assert.equal(found.destaque, true);
   assert.equal(store.photoFor(found.nome, found.categoria, found.foto), customFoto);
 });
+
+test('getDestaques e toggleDestaque gerenciam anúncios da Home corretamente', () => {
+  localStorage.clear();
+  const itensIniciais = store.getDestaques();
+  assert.ok(itensIniciais.length > 0, 'Deve retornar ao menos 1 item em destaque');
+
+  const primeiro = store.getItems()[0];
+  const estadoAntes = Boolean(primeiro.destaque);
+  store.toggleDestaque(primeiro.id);
+  
+  const atualizado = store.getItem(primeiro.id);
+  assert.equal(atualizado.destaque, !estadoAntes, 'toggleDestaque deve inverter o status de destaque');
+
+  store.toggleDestaque(primeiro.id);
+  const revertido = store.getItem(primeiro.id);
+  assert.equal(revertido.destaque, estadoAntes, 'toggleDestaque deve reverter ao estado original');
+});
+
 

@@ -114,14 +114,23 @@ describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
     assert.equal(pizza.foto, 'images/pizza-calabresa.jpg', 'Foto deve ser salva');
     console.log(`   ✓ Pizza criada com foto: ${pizza.nome} (${pizza.foto})`);
 
-    // 2. Editar
+    // 2. Editar com foto e destaque na Home
     pizza.preco = 48;
     pizza.foto = 'data:image/jpeg;base64,nova_foto_preview';
+    pizza.destaque = true;
     store.saveItem(pizza);
     const updated = store.getItems().find(i => i.id === pizza.id);
     assert.equal(updated.preco, 48, 'Preço deve ser 48');
     assert.equal(updated.foto, 'data:image/jpeg;base64,nova_foto_preview', 'Foto atualizada');
-    console.log(`   ✓ Preço e foto atualizados: 45 → 48, foto personalizada preservada`);
+    assert.equal(updated.destaque, true, 'Destaque na home deve ser true');
+    console.log(`   ✓ Preço, foto e destaque na Home atualizados: 45 → 48, destaque = true`);
+
+    // 2.1 Testar toggleDestaque
+    store.toggleDestaque(pizza.id);
+    assert.equal(store.getItem(pizza.id).destaque, false, 'Toggle destaque para false');
+    store.toggleDestaque(pizza.id);
+    assert.equal(store.getItem(pizza.id).destaque, true, 'Toggle destaque para true');
+    console.log(`   ✓ Toggle de anúncios na Página Inicial verificado`);
 
     // 3. Ajustar estoque
     store.adjustStock(pizza.id, -3);

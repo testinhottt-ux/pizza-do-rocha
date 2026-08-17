@@ -281,9 +281,9 @@ function novoVencimento() {
 function servirEstatico(req, res, caminho) {
   let p = decodeURIComponent(caminho);
   if (p === '/' || p === '') p = '/index.html';
-  // Rota secreta do painel: /ad entrega o próprio site, que abre o login da equipe.
-  // /ad/ redireciona para /ad para os caminhos relativos (images/, store.js) continuarem válidos.
-  if (p === '/ad/') { res.writeHead(302, { Location: '/ad' }); res.end(); return; }
+  // Rota secreta do painel: /ad (e aliases /admin, /ad/) entrega o próprio site, que abre o login da equipe.
+  // /ad/, /admin e /admin/ redirecionam para /ad para os caminhos relativos continuarem válidos.
+  if (p === '/ad/' || p === '/admin' || p === '/admin/') { res.writeHead(302, { Location: '/ad' }); res.end(); return; }
   if (p === '/ad') p = '/index.html';
 
   // Bloqueio de segurança: arquivos ocultos, diretórios internos e arquivos sensíveis

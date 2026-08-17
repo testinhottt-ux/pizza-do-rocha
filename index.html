@@ -375,17 +375,23 @@
 
 <!-- ADMIN MODAL -->
 <div class="modal" id="adminModal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0;">🔐 ACESSO DA EQUIPE</h2>
-    <p style="font-size: 14px; color: #999; margin: 0 0 20px;">Área restrita da Pizzaria do Rocha.</p>
-    <div class="admin-login-form">
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <input type="password" id="adminPassword" placeholder="Senha de acesso" style="font-family: monospace; flex: 1;" onkeydown="if(event.key==='Enter')loginAdmin()">
-        <button onclick="togglePasswordVisibility()" style="background: #8a7862; color: var(--creme); border: none; border-radius: 6px; padding: 14px; cursor: pointer; min-width: 50px; font-weight: 700;">👁️</button>
+  <div class="modal-content" style="max-width: 420px; text-align: center; background: var(--carvao2); border-radius: 12px; padding: 36px 32px;">
+    <h2 style="margin-top: 0; font-size: 24px; color: var(--creme); display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <span>🔐</span> ACESSO DA EQUIPE
+    </h2>
+    <p style="font-size: 14px; color: var(--areia); margin: 0 0 24px;">Área restrita de gestão da Pizzaria do Rocha.</p>
+    <form onsubmit="event.preventDefault(); loginAdmin();" class="admin-login-form" style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+      <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+        <input type="password" id="adminPassword" placeholder="Digite a senha de acesso" autocomplete="current-password" style="font-family: inherit; flex: 1; padding: 14px 16px; border-radius: 6px; border: 1px solid rgba(244,237,225,0.25); background: rgba(244,237,225,0.08); color: var(--creme); font-size: 15px; box-sizing: border-box;">
+        <button type="button" onclick="togglePasswordVisibility()" style="background: #8a7862; color: var(--creme); border: none; border-radius: 6px; padding: 14px 16px; cursor: pointer; min-width: 50px; font-weight: 700; flex-shrink: 0;" title="Mostrar / ocultar senha">👁️</button>
       </div>
-      <button onclick="loginAdmin()">✅ ENTRAR</button>
-      <button onclick="fecharAdminModal()" style="background: transparent; color: var(--musgo); border: 1px solid var(--musgo);">CANCELAR</button>
-    </div>
+      <button type="submit" id="btnAdminEntrar" style="padding: 14px; background: var(--fogo); color: var(--carvao); font-weight: 800; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; width: 100%; transition: background 0.2s;">
+        ✅ ENTRAR NO PAINEL
+      </button>
+      <button type="button" onclick="fecharAdminModal()" style="background: transparent; color: var(--musgo); border: 1px solid var(--musgo); padding: 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%;">
+        CANCELAR
+      </button>
+    </form>
   </div>
 </div>
 
@@ -1554,6 +1560,10 @@ const nome = document.getElementById('clienteNome').value.trim();
       if (isValid) {
         isAdminLoggedIn = true;
         adminPassword = trimmedPass;
+        try {
+          sessionStorage.setItem('admin_auth', '1');
+          sessionStorage.setItem('admin_pass', trimmedPass);
+        } catch (e) {}
 
         const modal = document.getElementById('adminModal');
         if (modal) modal.classList.remove('active');
@@ -1578,9 +1588,14 @@ const nome = document.getElementById('clienteNome').value.trim();
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
       adminPassword = '';
+      try {
+        sessionStorage.removeItem('admin_auth');
+        sessionStorage.removeItem('admin_pass');
+      } catch (e) {}
       pararAtualizacaoPedidos();
       try { history.replaceState(null, '', location.pathname.replace(/\/ad\/?$/, '/')); } catch (e) {}
       goToPage('home');
+      showToast('🚪 Você saiu do painel da equipe.');
     };
 
 
@@ -2681,8 +2696,21 @@ window.testPaymentConnection = async function() {
     updateCartBadge();
     carregarServerState();
 
-    // Área administrativa oculta: só aparece com /ad no fim da URL
-    if (window.rotaAdminSolicitada && window.rotaAdminSolicitada()) {
+    // Verificação de sessão administrativa persistente
+    let autoAuthOk = false;
+    try {
+      const savedAuth = sessionStorage.getItem('admin_auth');
+      const savedPass = sessionStorage.getItem('admin_pass');
+      if (savedAuth === '1' && savedPass && window.rotaAdminSolicitada && window.rotaAdminSolicitada()) {
+        isAdminLoggedIn = true;
+        adminPassword = savedPass;
+        autoAuthOk = true;
+        goToPage('admin');
+      }
+    } catch (e) {}
+
+    // Se a rota secreta foi solicitada e não está autenticado, abre o modal
+    if (!autoAuthOk && window.rotaAdminSolicitada && window.rotaAdminSolicitada()) {
       const modal = document.getElementById('adminModal');
       if (modal) {
         modal.classList.add('active');

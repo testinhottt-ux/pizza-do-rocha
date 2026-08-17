@@ -270,14 +270,11 @@
         <div style="font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px;">PIZZARIA <span style="color: var(--fogo);">DO ROCHA</span></div>
         <p style="font-size: 13px; color: var(--musgo); margin: 6px 0 0;">Sabor e qualidade · Delivery quente e rápido</p>
       </div>
-      <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; font-size: 14px;">
-        <a href="#" onclick="goToPage('cardapio')" style="color: var(--areia); text-decoration: none; font-weight: 600;">Cardápio</a>
-        <a href="#" onclick="goToPage('pedidos')" style="color: var(--areia); text-decoration: none; font-weight: 600;">Meu Pedido</a>
-        <a href="#" onclick="goToPage('carrinho')" style="color: var(--areia); text-decoration: none; font-weight: 600;">Carrinho</a>
-        <a href="#contato" style="color: var(--areia); text-decoration: none; font-weight: 600;">Contato</a>
-        <button onclick="goToPage('admin')" style="background: rgba(244,237,225,0.08); border: 1px solid rgba(244,237,225,0.18); color: var(--creme); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" title="Acesso Administrativo da Equipe">
-          🔐 Área da Equipe
-        </button>
+      <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap; font-size: 14px;">
+        <a href="#" onclick="goToPage('cardapio')" style="color: var(--areia); text-decoration: none; font-weight: 600; transition: color 0.2s;">Cardápio</a>
+        <a href="#" onclick="goToPage('pedidos')" style="color: var(--areia); text-decoration: none; font-weight: 600; transition: color 0.2s;">Meu Pedido</a>
+        <a href="#" onclick="goToPage('carrinho')" style="color: var(--areia); text-decoration: none; font-weight: 600; transition: color 0.2s;">Carrinho</a>
+        <a href="#contato" style="color: var(--areia); text-decoration: none; font-weight: 600; transition: color 0.2s;">Contato</a>
       </div>
     </div>
     <div style="max-width: 1200px; margin: 30px auto 0; padding-top: 20px; border-top: 1px solid rgba(244,237,225,0.05); display: flex; justify-content: space-between; font-size: 12px; color: #7a6b5d; flex-wrap: wrap; gap: 10px;">
@@ -847,10 +844,26 @@
     try { history.replaceState(null, '', location.pathname.replace(/\/ad\/?$/, '/')); } catch (e) {}
   };
 
-  // A área administrativa só existe quando a URL termina em /ad (ou #ad)
+  // A área administrativa é ativada estritamente quando a URL termina em /ad (ou #ad)
   window.rotaAdminSolicitada = function() {
-    return /\/ad\/?$/.test(location.pathname) || location.hash === '#ad';
+    const path = (location.pathname || '').toLowerCase();
+    const hash = (location.hash || '').toLowerCase();
+    return /\/ad\/?$/.test(path) || hash === '#ad' || hash === '#/ad';
   };
+
+  window.checarAberturaAdminAuto = function() {
+    if (window.rotaAdminSolicitada && window.rotaAdminSolicitada()) {
+      const modal = document.getElementById('adminModal');
+      if (modal && !modal.classList.contains('active')) {
+        modal.classList.add('active');
+        setTimeout(() => document.getElementById('adminPassword')?.focus(), 150);
+      }
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', window.checarAberturaAdminAuto);
+  window.addEventListener('hashchange', window.checarAberturaAdminAuto);
+  window.addEventListener('popstate', window.checarAberturaAdminAuto);
 
   // ── Máscaras de digitação: CPF (000.000.000-00) e telefone ((00) 00000-0000) ──
   // O campo mostra a máscara para conferência; o valor real (só números) é lido no submit.
@@ -948,7 +961,11 @@
   // ===== NAVEGAÇÃO =====
    window.goToPage = function(page) {
      if (page === 'admin' && !isAdminLoggedIn) {
-       window.toggleAdminModal();
+       if (window.rotaAdminSolicitada && window.rotaAdminSolicitada()) {
+         window.toggleAdminModal();
+       } else {
+         window.goToPage('home');
+       }
        return;
      }
 

@@ -647,3 +647,21 @@ Implementado conforme AG2 protocol v14.5:
   - `test-phone-sync.mjs`: Novo teste completo de sincronização DOM + Store + API do servidor (4/4 passando).
   - Suíte completa: `npm test` 100% verde (unitário, phone-sync, e2e, server, deep-system).
 
+## Atualização 2026-08-18 — Estabilização do Motor WhatsApp Web (Baileys) e Ciclo Completo de Estados
+- ✅ **Resolução do 9º Dígito Brasileiro (`resolverJid`)**:
+  - Implementada resolução automática via `sock.onWhatsApp(variantes)` antes do envio, resolvendo a disparidade entre identificadores com 12 ou 13 dígitos no WhatsApp Brasil (evita erro 463 / missing tctoken).
+- ✅ **Blindagem e Persistência da Sessão**:
+  - Removido `limparSessao()` automático de desconexões transitórias (401/403/conflict).
+  - Adicionada auto-recuperação do socket em tempo de envio (`enviarMensagem`), aguardando reconexão se o canal estiver em sync.
+- ✅ **Simulação do Ciclo Completo de Estados de Pedido**:
+  - Validado envio ponta a ponta para todos os estágios:
+    1. `recebido` (aviso ao dono com dados do cliente e itens)
+    2. `pago` (comprovante oficial com link ao cliente + confirmação ao dono)
+    3. `preparando` (notificação de preparo na cozinha ao cliente)
+    4. `forno` (notificação de forno ao cliente)
+    5. `saiu_entrega` (notificação de saída para entrega ao cliente)
+    6. `entregue` (notificação de conclusão ao cliente)
+- ✅ **Repositório GitHub**:
+  - Sincronizado e atualizado na branch `main`.
+
+

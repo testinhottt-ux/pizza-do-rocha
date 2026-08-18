@@ -13,7 +13,9 @@ import {
   makeWASocket,
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
+  Browsers,
 } from '@whiskeysockets/baileys';
+import qrcodeTerminal from 'qrcode-terminal';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SESSION_DIR = path.join(__dirname, 'wa-session');
@@ -87,33 +89,51 @@ async function conectar() {
       sock = makeWASocket({
         version,
         auth: state,
-        browser: ['Pizzaria do Rocha', 'Chrome', '115.0'],
+        browser: Browsers.ubuntu('Chrome'),
+        qrTimeout: 180000, // 3 minutos
+        connectTimeoutMs: 30000,
+        defaultQueryTimeoutMs: 60000,
+        syncFullHistory: false,
         markOnlineOnConnect: true,
       });
 
-      sock.ev.on('creds.update', saveCreds);
+      sock.ev.on('creds.update', (creds) => {
+        log('DEBUG', 'Credenciais atualizadas pelo WhatsApp', { registered: creds?.registered });
+        saveCreds(creds);
+      });
       sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect, qr } = update;
-        // Em sessão não registrada, o WhatsApp manda um QR novo a cada ~20s.
-        if (qr) { qrAtual = qr; lastError = null; }
-        if (connection === 'open') {
+        const { connection, lastDisconnect, qr, isNewLogin } = update;
+        if (qr) {
+          qrAtual = qr;
+          lastError = null;
+          log('INFO', 'Novo QR Code gerado pelo WhatsApp:');
+          try { qrcodeTerminal.generate(qr, { small: true }); } catch {}
+        }
+        if (isNewLogin) log('INFO', 'Novo login autorizado no WhatsApp!');
+        if (connection === 'connecting') {
+          log('INFO', 'Conectando ao WebSocket do WhatsApp...');
+        } else if (connection === 'open') {
           sessionReady = true; connected = true; lastError = null; qrAtual = null;
           pausarReconexao = false;
           ownerJid = sock?.user?.id?.split(':')[0]
             ? sock.user.id.split(':')[0] + '@s.whatsapp.net'
             : null;
-          log('INFO', 'Conexão aberta — pareado com', ownerJid ? { user: ownerJid } : {});
+          log('INFO', '✅ CONEXÃO ESTABELECIDA E DISPOSITIVO PAREADO!', ownerJid ? { user: ownerJid } : {});
         } else if (connection === 'close') {
           sessionReady = false; connected = false;
+          const status = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.lastServerStatusCode || 500;
           lastError = lastDisconnect?.error?.message || 'Conexão fechada';
-          log('WARN', 'Conexão fechada', { error: lastError, pausarReconexao });
-          const code = lastDisconnect?.error?.lastServerStatusCode || 500;
+          log('WARN', 'Conexão fechada', { error: lastError, status, pausarReconexao });
           sock = null; connectPromise = null;
-          // Durante o pareamento NÃO reconecta (a reconexão volta pro modo QR e mata o código).
-          // Só reconecta sozinho em sessões já registradas.
-          if (code === 0 && !pausarReconexao) reconnectTimer = setTimeout(conectar, 8000);
-        } else {
-          log('DEBUG', 'connection.update', { connection });
+          if (status === 515) {
+            log('INFO', '🔄 Stream restart (515) recebido do WhatsApp. Concluindo pareamento e reconectando imediatamente...');
+            reconnectTimer = setTimeout(conectar, 800);
+          } else if (status === 401 || status === 403) {
+            log('WARN', 'Sessão deslogada pelo WhatsApp — reiniciando');
+            limparSessao();
+          } else if (!pausarReconexao) {
+            reconnectTimer = setTimeout(conectar, 5000);
+          }
         }
       });
       return sock;
@@ -130,19 +150,9 @@ async function conectar() {
 export function iniciarBackground() { conectar().catch(() => {}); }
 
 // Prepara o fluxo de QR para o pareamento, de forma IDEMPOTENTE.
-// O navegador chama /api/whatsapp/qrcode a cada ~4s; NÃO podemos limpar a
-// sessão a cada chamada, senão o QR é destruído antes de ser escaneado
-// (isso gerava o loop "QR refs attempts ended").
-// Regras:
-//  - Se já pareado, não faz nada.
-//  - Se já existe um socket vivo (com ou sem QR), deixa ele viver.
-//  - Só limpa a sessão UMA vez, quando ela está incompleta (registered:false)
-//    e ainda não há socket ativo.
 export function prepararQr() {
   if (ownerJid) return;                 // já pareado
-  if (sock || connectPromise) return;   // conexão/QR já em andamento — não mexer
-  // Sem socket ativo: se a sessão em disco está incompleta, descarta antes de reconectar.
-  if (sessaoIncompleta()) limparSessao();
+  if (sock || connectPromise || lastPairCode) return;   // conexão/QR já em andamento — não mexer
   conectar().catch(() => {});
 }
 
@@ -198,14 +208,15 @@ export async function gerarCodigoPareamento(cellphone) {
   if (raw.length < 10 || raw.length > 15) return { ok: false, error: 'Número inválido (informe DDI 55 + DDD + 9 dígitos)' };
   const cel = limparNumero(raw);
 
-  if (sessaoIncompleta()) limparSessao();
+  limparSessao();
+  pausarReconexao = true;
 
   for (let tentativa = 1; tentativa <= 3; tentativa++) {
     try {
       await conectar();
       await esperarSocketAberto();
       await new Promise(r => setTimeout(r, 1500)); // o handshake precisa assentar
-      const rawCode = await sock.requestPairingCode(cel.replace(/^55/, ''));
+      const rawCode = await sock.requestPairingCode(cel);
       lastPairCode = formatarCode(rawCode);
       lastError = null;
       log('INFO', 'Código de pareamento gerado', { phone: cel, tentativa });

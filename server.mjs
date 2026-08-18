@@ -302,7 +302,17 @@ function servirEstatico(req, res, caminho) {
     if (err) { res.writeHead(404); res.end('Not Found'); return; }
     aplicarSecurityHeaders(res);
     const ext = path.extname(abs).toLowerCase();
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+    const isMedia = /\.(png|jpe?g|svg|webp|ico|woff2?|ttf)$/i.test(ext);
+    // Para HTML, JS, CSS, SW e Manifest: NUNCA usar cache local (sempre entrega a versão mais recente)
+    const cacheHeader = isMedia
+      ? 'public, max-age=3600, stale-while-revalidate=86400'
+      : 'no-cache, no-store, must-revalidate, max-age=0';
+    res.writeHead(200, {
+      'Content-Type': MIME[ext] || 'application/octet-stream',
+      'Cache-Control': cacheHeader,
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
     res.end(buf);
   });
 }

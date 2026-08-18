@@ -14,11 +14,14 @@
 <meta property="og:image" content="images/pizza-margherita.jpg">
 <meta property="og:url" content="https://pizza-do-rocha.onrender.com">
 <meta name="twitter:card" content="summary_large_image">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Pizzaria Delivery do Rocha</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json?v=2.8.1">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' font-weight='bold' fill='%23e8432f'>🍕</text></svg>">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="awards.css">
+<link rel="stylesheet" href="styles.css?v=2.8.1">
+<link rel="stylesheet" href="awards.css?v=2.8.1">
 <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -934,7 +937,7 @@
 </script>
 
 <script type="module">
-  import * as store from './store.js';
+  import * as store from './store.js?v=2.8.1';
   
   // ===== VARIÁVEIS GLOBAIS =====
   let currentPage = 'home';
@@ -2905,7 +2908,18 @@ window.testPaymentConnection = async function() {
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function() {});
+      navigator.serviceWorker.register('/sw.js?v=2.8.1').then(function(reg) {
+        // Força checagem de atualização no servidor a cada abertura
+        reg.update();
+      }).catch(function() {});
+    });
+    // Quando uma versão nova do Service Worker ativar, garante a atualização transparente
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
     });
   }
 

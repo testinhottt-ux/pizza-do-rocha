@@ -316,19 +316,20 @@ export async function enviarMensagem(numero, texto, tag = '') {
   return { ok: true, to: numero };
 }
 
-// Envia mensagem e, se ainda não pareado, retorna { notPaired: true } sem lançar.
+// Envia mensagem e, se ainda não pareado ou sem conexão ativa, retorna { notPaired: true } sem lançar.
 export async function enviarSeguro(numero, texto, tag = '') {
   try { return await enviarMensagem(numero, texto, tag); }
   catch (err) {
+    const isNotPaired = err.code === 'NOT_PAIRED' || err.code === 'NOT_CONNECTED' || !sessionReady || !sock;
     registrarHistorico({
       ts: Date.now(),
       para: limparNumero(numero),
       texto: String(texto),
       tag: String(tag || ''),
-      status: err.code === 'NOT_PAIRED' ? 'nao-pareado' : 'falhou',
+      status: isNotPaired ? 'nao-pareado' : 'falhou',
       erro: err.message,
     });
-    return { ok: false, notPaired: err.code === 'NOT_PAIRED', error: err.message };
+    return { ok: false, notPaired: isNotPaired, error: err.message };
   }
 }
 

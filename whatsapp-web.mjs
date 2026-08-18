@@ -84,6 +84,12 @@ async function conectar() {
   connectPromise = (async () => {
     try {
       const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
+      if (state.creds?.me && state.creds.registered !== true) {
+        state.creds.registered = true;
+      }
+      if (state.creds?.me?.id) {
+        ownerJid = state.creds.me.id.split(':')[0] + '@s.whatsapp.net';
+      }
       const { version } = await fetchLatestBaileysVersion();
 
       sock = makeWASocket({
@@ -98,7 +104,11 @@ async function conectar() {
       });
 
       sock.ev.on('creds.update', (creds) => {
-        log('DEBUG', 'Credenciais atualizadas pelo WhatsApp', { registered: creds?.registered });
+        if (creds?.me) {
+          creds.registered = true;
+          ownerJid = creds.me.id.split(':')[0] + '@s.whatsapp.net';
+        }
+        log('DEBUG', 'Credenciais atualizadas pelo WhatsApp', { registered: creds?.registered, me: !!creds?.me });
         saveCreds(creds);
       });
       sock.ev.on('connection.update', (update) => {
@@ -117,7 +127,7 @@ async function conectar() {
           pausarReconexao = false;
           ownerJid = sock?.user?.id?.split(':')[0]
             ? sock.user.id.split(':')[0] + '@s.whatsapp.net'
-            : null;
+            : ownerJid;
           log('INFO', '✅ CONEXÃO ESTABELECIDA E DISPOSITIVO PAREADO!', ownerJid ? { user: ownerJid } : {});
         } else if (connection === 'close') {
           sessionReady = false; connected = false;
@@ -128,11 +138,10 @@ async function conectar() {
           if (status === 515) {
             log('INFO', '🔄 Stream restart (515) recebido do WhatsApp. Concluindo pareamento e reconectando imediatamente...');
             reconnectTimer = setTimeout(conectar, 800);
-          } else if (status === 401 || status === 403) {
-            log('WARN', 'Sessão deslogada pelo WhatsApp — reiniciando');
-            limparSessao();
-          } else if (!pausarReconexao) {
-            reconnectTimer = setTimeout(conectar, 5000);
+          } else {
+            // Reconecta automaticamente preservando a sessão salva (nunca apaga creds sem ação do usuário)
+            const delay = (status === 401 || status === 403) ? 8000 : 3000;
+            reconnectTimer = setTimeout(conectar, delay);
           }
         }
       });
@@ -157,13 +166,19 @@ export function prepararQr() {
 }
 
 export function getStatus() {
+  let savedPhone = null;
+  try {
+    const creds = JSON.parse(fs.readFileSync(path.join(SESSION_DIR, 'creds.json'), 'utf8'));
+    if (creds?.me?.id) savedPhone = creds.me.id.split(':')[0].replace(/\D/g, '');
+  } catch {}
+  const phone = ownerJid ? ownerJid.split('@')[0] : savedPhone;
   return {
     ativo: !!sock && sessionReady,
-    pareado: !!ownerJid,
-    ownerPhone: ownerJid ? ownerJid.split('@')[0] : null,
+    pareado: Boolean(phone),
+    ownerPhone: phone,
     pairCode: lastPairCode,
     error: lastError ? String(lastError) : null,
-    chave: !!ownerJid,
+    chave: Boolean(phone),
     qr: qrAtual,
   };
 }
@@ -225,7 +240,6 @@ export async function gerarCodigoPareamento(cellphone) {
       lastError = err.message;
       log('WARN', 'Falha ao gerar código', { tentativa, error: err.message });
       if (tentativa === 3) return { ok: false, error: err.message };
-      limparSessao();
       await new Promise(r => setTimeout(r, 1000 * tentativa)); // backoff
     }
   }
@@ -235,9 +249,24 @@ export async function gerarCodigoPareamento(cellphone) {
 // Envia uma mensagem de texto para qualquer número (comprador ou dono).
 // tag: rótulo opcional p/ o histórico (ex.: 'novo-pedido', 'pagamento', 'status').
 export async function enviarMensagem(numero, texto, tag = '') {
-  if (!sessionReady || !ownerJid) {
+  if (!ownerJid) {
+    try {
+      const creds = JSON.parse(fs.readFileSync(path.join(SESSION_DIR, 'creds.json'), 'utf8'));
+      if (creds?.me?.id) ownerJid = creds.me.id.split(':')[0] + '@s.whatsapp.net';
+    } catch {}
+  }
+  if (!ownerJid) {
     const e = new Error('WhatsApp não pareado. Pare o aparelho do dono no painel.');
     e.code = 'NOT_PAIRED';
+    throw e;
+  }
+  if (!sock || !sessionReady) {
+    await conectar();
+    await esperarSocketAberto(8000).catch(() => {});
+  }
+  if (!sock) {
+    const e = new Error('Conexão com WhatsApp indisponível no momento.');
+    e.code = 'NOT_CONNECTED';
     throw e;
   }
   const jid = numeroParaJid(numero);

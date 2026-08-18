@@ -36,7 +36,7 @@ export const CONTATO = {
 // ---- Fotos ilustrativas (baixadas em ./images) ----
 export const FOTOS = {
   hero: 'images/hero-forno.jpg',
-  historia: 'images/historia-pizzaiolo.jpg',
+  historia: 'images/pizza-meio-salaminho-lombinho.jpg',
   generica: 'images/pizza-mussarela-artesanal.jpg',
   galeria: [
     'images/pizza-margherita.jpg',

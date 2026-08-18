@@ -159,17 +159,20 @@ PAINEL ADMINISTRATIVO & GESTÃO (index.html #adminPage)
   - `cartCount()`, `cartTotal()`
 - **Funções de Pedidos (Client-side)**:
   - `getOrders()`, `createOrder(cliente, metodo, troco)`, `updateOrderStatus(orderId, status)`
-- **Utilitários**:
+- **Utilitários e Formatação**:
+  - `formatarTelefone(numero)` — Formata números nacionais com DDD e hífen
+  - `updateContatoTelefone(novoNumero)` — Atualiza objeto reativo `CONTATO`
   - `photoFor(nome, cat, custom)`, `money(v)`, `checkAdminPassword(p)`, `setAdminPassword(p)`
 
 ### Módulo: `ui.js`
-- **Dependências**: `store.js` (`CONTATO`, `cartCount`)
+- **Dependências**: `store.js` (`CONTATO`, `cartCount`, `formatarTelefone`, `updateContatoTelefone`)
 - **Funções exportadas**:
   - `esc(str)` — Sanitização / escape HTML
+  - `formatarTelefone(num)` / `updateContatoTelefone(num)` — Exportados da store
   - `renderNav(active)` — Renderiza navbar responsiva
   - `renderFooter()` — Renderiza rodapé institucional
   - `renderWhatsApp()` — Botão flutuante
-  - `syncWhatsAppFromServer()` — Sincroniza número oficial do backend
+  - `syncWhatsAppFromServer()` — Sincroniza número oficial do backend e atualiza DOM / links
 
 ### Módulo: `infinitepay-client.mjs`
 - **Funções exportadas**:

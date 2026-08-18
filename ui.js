@@ -1,5 +1,5 @@
-// ui.js — componentes compartilhados (nav, footer, whatsapp) em vanilla JS.
-import { CONTATO, cartCount } from './store.js';
+import { CONTATO, cartCount, formatarTelefone, updateContatoTelefone } from './store.js';
+export { formatarTelefone, updateContatoTelefone };
 
 const WA_SVG = '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3C9.4 3 4 8.3 4 14.9c0 2.4.7 4.6 1.9 6.5L4 29l7-1.8c1.8 1 3.8 1.5 5.9 1.5 6.6 0 12-5.3 12-11.9C28.9 8.3 22.6 3 16 3zm0 21.6c-1.9 0-3.7-.5-5.3-1.5l-.4-.2-4.1 1.1 1.1-4-.3-.4a9.6 9.6 0 01-1.5-5.2C5.6 9.6 10.3 5 16 5s10.4 4.6 10.4 9.9-4.7 9.7-10.4 9.7zm5.7-7.3c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.3 8.3 0 01-2.5-1.5 9 9 0 01-1.7-2.1c-.2-.3 0-.5.1-.7l.5-.6.3-.5c.1-.2 0-.4 0-.5l-1-2.3c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.4 5.3 4.7l1.8.6c.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.2-.6-.4z"/></svg>';
 
@@ -54,7 +54,7 @@ export function renderWhatsApp() {
   return `<a class="wa-float" href="${href}" target="_blank" rel="noopener" aria-label="WhatsApp">${WA_SVG} WhatsApp</a>`;
 }
 
-// Carrega o número oficial do servidor (config admin) e atualiza os links wa.me da página.
+// Carrega o número oficial do servidor (config admin) e atualiza os links e textos da página.
 export async function syncWhatsAppFromServer() {
   try {
     const r = await fetch('/api/config');
@@ -63,10 +63,21 @@ export async function syncWhatsAppFromServer() {
       const num = String(cfg.whatsappNotif).replace(/\D/g, '').replace(/^0/, '');
       const full = num.startsWith('55') ? num : '55' + num;
       window.APP_WHATSAPP = full;
+      const formatted = formatarTelefone(num);
+
+      updateContatoTelefone(num);
+
       document.querySelectorAll('a[href^="https://wa.me/"]').forEach(a => {
         const msg = a.href.includes('?text=') ? a.href.split('?text=')[1] : encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.');
         a.href = `https://wa.me/${full}?text=${msg}`;
       });
+      document.querySelectorAll('a[href^="tel:"]').forEach(a => {
+        a.href = `tel:+${full}`;
+      });
+      document.querySelectorAll('[data-contact-phone]').forEach(el => {
+        el.textContent = formatted;
+      });
+
       // botão flutuante index.html (fora do DOM compartilhado)
       const float = document.getElementById('waFloat');
       if (float) float.href = `https://wa.me/${full}?text=${encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.')}`;

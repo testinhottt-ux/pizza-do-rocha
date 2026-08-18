@@ -255,4 +255,29 @@ test('getDestaques e toggleDestaque gerenciam anúncios da Home corretamente', (
   assert.equal(revertido.destaque, estadoAntes, 'toggleDestaque deve reverter ao estado original');
 });
 
+test('formatarTelefone formata números brasileiros de 10, 11, 12 e 13 dígitos', () => {
+  assert.equal(store.formatarTelefone('31996678280'), '(31) 99667-8280');
+  assert.equal(store.formatarTelefone('5531996678280'), '(31) 99667-8280');
+  assert.equal(store.formatarTelefone('3132221234'), '(31) 3222-1234');
+  assert.equal(store.formatarTelefone('553132221234'), '(31) 3222-1234');
+  assert.equal(store.formatarTelefone('9991867625'), '(99) 9186-7625');
+  assert.equal(store.formatarTelefone('559991867625'), '(99) 9186-7625');
+  assert.equal(store.formatarTelefone(''), '');
+  assert.equal(store.formatarTelefone(null), '');
+});
+
+test('updateContatoTelefone atualiza dinamicamente store.CONTATO', () => {
+  const c1 = store.updateContatoTelefone('5531996678280');
+  assert.equal(c1.telefone, '(31) 99667-8280');
+  assert.equal(c1.telefoneDigits, '5531996678280');
+  assert.equal(c1.whatsapp, 'https://wa.me/5531996678280');
+  assert.match(c1.whatsappMsg, /wa\.me\/5531996678280/);
+
+  const c2 = store.updateContatoTelefone('11987654321');
+  assert.equal(c2.telefone, '(11) 98765-4321');
+  assert.equal(c2.telefoneDigits, '5511987654321');
+  assert.equal(c2.whatsapp, 'https://wa.me/5511987654321');
+});
+
+
 

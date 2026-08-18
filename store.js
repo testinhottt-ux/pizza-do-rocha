@@ -318,3 +318,40 @@ export function checkAdminPass(pass) { return hashSenha(String(pass ?? '')) === 
 
 // ---- Helpers de formatação ----
 export function money(n) { return 'R$ ' + Number(n || 0).toFixed(2).replace('.', ','); }
+
+export function formatarTelefone(numero) {
+  if (!numero) return '';
+  const digits = String(numero).replace(/\D/g, '');
+  if (!digits) return '';
+  let d = digits;
+  if (d.startsWith('55') && (d.length === 12 || d.length === 13)) {
+    d = d.slice(2);
+  }
+  if (d.length === 11) {
+    return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  }
+  if (d.length === 10) {
+    return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  }
+  if (d.length === 9) {
+    return `${d.slice(0, 5)}-${d.slice(5)}`;
+  }
+  if (d.length === 8) {
+    return `${d.slice(0, 4)}-${d.slice(4)}`;
+  }
+  return digits;
+}
+
+export function updateContatoTelefone(novoNumero) {
+  if (!novoNumero) return CONTATO;
+  const digits = String(novoNumero).replace(/\D/g, '').replace(/^0/, '');
+  if (!digits) return CONTATO;
+  const full = digits.startsWith('55') ? digits : '55' + digits;
+  CONTATO.telefoneDigits = full;
+  CONTATO.telefone = formatarTelefone(digits);
+  CONTATO.whatsapp = `https://wa.me/${full}`;
+  CONTATO.whatsappMsg = `https://wa.me/${full}?text=` +
+    encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.');
+  return CONTATO;
+}
+

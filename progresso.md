@@ -629,3 +629,21 @@ Implementado conforme AG2 protocol v14.5:
 - ✅ Testes: `npm test` 8/8 | `test-server.mjs` todos verdes
 - ✅ Site **estável e online**: https://cards-owen-shield-circuit.trycloudflare.com
 - 📝 Documentação: `RESUMO_IMPLEMENTACOES_20260809.md` com checklist completo
+
+## Atualização 2026-08-18 — Telefone de Contato Dinâmico Reativo com o Painel Administrativo
+- ✅ **Sincronização Dinâmica Implementada**:
+  - `store.js`: Adicionadas as funções `formatarTelefone(numero)` e `updateContatoTelefone(novoNumero)` para atualizar `store.CONTATO` de forma reativa.
+  - `ui.js`: Integração com `formatarTelefone` e `updateContatoTelefone` no `syncWhatsAppFromServer`.
+  - `index.html`: Criada a função `atualizarTelefoneContatoNaPagina(numero)` que atualiza instantaneamente todos os elementos e links da página sem necessidade de recarregar:
+    - Top bar (`#topBarPhoneLink`): texto formatado `📞 (DD) NNNNN-NNNN` e href `wa.me/...`
+    - Hero CTA (`#heroWaBtn`): link do WhatsApp
+    - Seção de Contato (`#contatoPhoneLink`, `#contatoWaBtn`, `#contatoLigarBtn`): texto formatado, botão WhatsApp e link de ligação `tel:+55...`
+    - Cabeçalho do Cardápio (`#cardapioPhoneLink`): texto e link wa.me
+    - Botão flutuante WhatsApp (`#waFloat`)
+    - Inputs do painel administrativo (`#whatsappNotif`)
+  - Ações do Admin: Tanto ao salvar via `salvarNumeroWhatsApp` ("Salvar Celular") quanto via `savePaymentConfig` ("Salvar Configurações"), toda a página reflete o novo número imediatamente.
+- ✅ **Testes Automatizados**:
+  - `tests/store.test.mjs`: Testes unitários para `formatarTelefone` e `updateContatoTelefone` (23/23 testes passando).
+  - `test-phone-sync.mjs`: Novo teste completo de sincronização DOM + Store + API do servidor (4/4 passando).
+  - Suíte completa: `npm test` 100% verde (unitário, phone-sync, e2e, server, deep-system).
+

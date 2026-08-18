@@ -66,9 +66,41 @@ function limparNumero(n) {
   if (!d.startsWith('55')) d = '55' + d;
   return d;
 }
+
 function numeroParaJid(numero) {
   const d = limparNumero(numero);
   return d ? d + '@s.whatsapp.net' : null;
+}
+
+// Resolve o JID real registrado no WhatsApp consultando o servidor (resolve variação do 9º dígito no Brasil)
+async function resolverJid(numero) {
+  const d = limparNumero(numero);
+  if (!d) return null;
+  const jidPadrao = d + '@s.whatsapp.net';
+  if (sock && sessionReady) {
+    try {
+      const variantes = [jidPadrao];
+      if (d.startsWith('55') && (d.length === 12 || d.length === 13)) {
+        const ddd = d.slice(2, 4);
+        const resto = d.slice(4);
+        if (d.length === 13 && resto.startsWith('9')) {
+          variantes.push('55' + ddd + resto.slice(1) + '@s.whatsapp.net'); // remove o 9 (ex: 553191867625)
+        } else if (d.length === 12) {
+          variantes.push('55' + ddd + '9' + resto + '@s.whatsapp.net'); // adiciona o 9 (ex: 5531991867625)
+        }
+      }
+      for (const v of variantes) {
+        const res = await sock.onWhatsApp(v);
+        if (Array.isArray(res) && res.length > 0 && res[0]?.exists && res[0]?.jid) {
+          log('DEBUG', 'JID resolvido com sucesso via onWhatsApp', { original: numero, jid: res[0].jid });
+          return res[0].jid;
+        }
+      }
+    } catch (err) {
+      log('WARN', 'Falha ao consultar onWhatsApp, usando fallback padrão', { error: err.message });
+    }
+  }
+  return jidPadrao;
 }
 
 function formatarCode(raw) {
@@ -269,10 +301,10 @@ export async function enviarMensagem(numero, texto, tag = '') {
     e.code = 'NOT_CONNECTED';
     throw e;
   }
-  const jid = numeroParaJid(numero);
+  const jid = await resolverJid(numero);
   if (!jid) throw new Error('Número inválido');
   await sock.sendMessage(jid, { text: String(texto) });
-  log('INFO', 'Mensagem enviada', { to: numero, len: String(texto).length });
+  log('INFO', 'Mensagem enviada', { to: numero, jid, len: String(texto).length });
   registrarHistorico({
     ts: Date.now(),
     para: limparNumero(numero),

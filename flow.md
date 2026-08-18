@@ -6,6 +6,7 @@
 **Mensageria & WhatsApp**: WhatsApp Web (Baileys)  
 **Backend**: Node.js (`server.mjs`) + ES Modules  
 **Frontend**: Single Page App (`index.html` + `store.js` + `ui.js` + CSS Awwwards)  
+**Diagrama Visual de Arquitetura**: [`docs/diagrama-arquitetura.html`](docs/diagrama-arquitetura.html)  
 
 ---
 

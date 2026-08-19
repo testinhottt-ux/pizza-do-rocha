@@ -1991,7 +1991,10 @@ const nome = document.getElementById('clienteNome').value.trim();
     window.toggleAdminItemDestaque = async function(id) {
       const item = store.toggleDestaque(id);
       if (item) {
-        await store.saveItemNoServidor(item, adminPassword);
+        const res = await store.saveItemNoServidor(item, adminPassword);
+        if (!res.ok && res.error) {
+          showToast(`⚠️ Destaque alterado localmente, mas não salvou no servidor: ${res.error}`);
+        }
       }
       renderAdminCardapio();
       renderHome();
@@ -2017,11 +2020,16 @@ const nome = document.getElementById('clienteNome').value.trim();
         nome, categoria, preco, descricao, estoque, foto, destaque, ativo: true
       };
 
-      await store.saveItemNoServidor(item, adminPassword);
+      const res = await store.saveItemNoServidor(item, adminPassword);
       clearAdminForm();
       renderAdminCardapio();
       renderHome();
-      showToast(editingItemId ? 'Produto atualizado no cardápio de todos!' : 'Produto adicionado ao cardápio de todos!');
+
+      if (res.ok) {
+        showToast(editingItemId ? '✅ Produto atualizado e sincronizado para todos!' : '✅ Produto cadastrado e sincronizado para todos!');
+      } else {
+        showToast(`⚠️ Salvo apenas neste navegador. Falha no servidor: ${res.error || 'Não autorizado'}`);
+      }
     };
 
     window.editAdminItem = function(id) {
@@ -2055,11 +2063,15 @@ const nome = document.getElementById('clienteNome').value.trim();
     };
 
     window.deleteAdminItem = async function(id) {
-      if (confirm('Tem certeza?')) {
-        await store.deleteItemNoServidor(id, adminPassword);
+      if (confirm('Tem certeza que deseja excluir este produto do cardápio?')) {
+        const res = await store.deleteItemNoServidor(id, adminPassword);
         renderAdminCardapio();
         renderHome();
-        showToast('Produto deletado com sucesso!');
+        if (res.ok) {
+          showToast('✅ Produto excluído com sucesso do servidor e de todos os clientes!');
+        } else {
+          showToast(`⚠️ Excluído apenas localmente. Falha no servidor: ${res.error || 'Não autorizado'}`);
+        }
       }
     };
 
@@ -2078,6 +2090,7 @@ const nome = document.getElementById('clienteNome').value.trim();
         await store.saveItemNoServidor(item, adminPassword);
       }
       renderAdminEstoque();
+      renderAdminCardapio();
     };
 
     function clearAdminForm() {

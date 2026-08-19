@@ -387,6 +387,9 @@ export async function syncCardapioComServidor() {
 
 export async function saveItemNoServidor(item, adminPass) {
   const localSaved = saveItem(item);
+  let serverOk = false;
+  let serverError = null;
+
   if (typeof fetch !== 'undefined') {
     try {
       const pass = adminPass || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin_pass') : '');
@@ -404,16 +407,23 @@ export async function saveItemNoServidor(item, adminPass) {
           db.items = data.items;
           save(db);
         }
+        serverOk = true;
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        serverError = errJson.error || `HTTP ${res.status}`;
       }
     } catch (e) {
-      // Ignora falha se offline
+      serverError = e.message;
     }
   }
-  return localSaved;
+  return { ok: serverOk, item: localSaved, error: serverError };
 }
 
 export async function deleteItemNoServidor(id, adminPass) {
   deleteItem(id);
+  let serverOk = false;
+  let serverError = null;
+
   if (typeof fetch !== 'undefined') {
     try {
       const pass = adminPass || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin_pass') : '');
@@ -430,9 +440,16 @@ export async function deleteItemNoServidor(id, adminPass) {
           db.items = data.items;
           save(db);
         }
+        serverOk = true;
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        serverError = errJson.error || `HTTP ${res.status}`;
       }
-    } catch (e) {}
+    } catch (e) {
+      serverError = e.message;
+    }
   }
+  return { ok: serverOk, error: serverError };
 }
 
 

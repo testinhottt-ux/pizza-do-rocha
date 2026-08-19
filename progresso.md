@@ -1,12 +1,20 @@
-# Progresso — Pizzaria do Rocha v2.8.0 (CARDÁPIO MULTI-CLIENTES + 1/2 SALAMINHO & LOMBINHO + BEBIDAS R$ 13,99)
+# Progresso — Pizzaria do Rocha v2.8.3 (MERMAID + PERSISTÊNCIA AUTO-MIGRÁVEL DO CARDÁPIO)
 
-**Status**: ✅ **COMPLETE & RUNNING** — Sincronização em tempo real do cardápio administrativo no backend para todos os clientes, nova pizza 1/2 Salaminho e 1/2 Lombinho Canadense com foto em destaque na História & Filosofia, bebidas apenas Coca-Cola e Guaraná a R$ 13,99, remoção total de água mineral, 90+ testes passando  
+**Status**: ✅ **COMPLETE & RUNNING** — Modelagem C4 com Mermaid.js interativo em `/arquitetura`, persistência resiliente e auto-migrável do cardápio administrativo no backend e frontend com feedback imediato de status.  
 **Data**: 2026-08-19  
-**Testes**: 100% ✅ | Unitários (23/23), E2E (9/9), Integração API (28/28), Deep System (35/35), Sincronização Multi-Clientes (7/7)  
+**Testes**: 100% ✅ | Unitários (23/23), E2E (9/9), Integração API (28/28), Deep System (36/36), Sincronização Multi-Clientes (7/7)  
 
 ---
 
-## 🎯 v2.8.0 — SINCRONIZAÇÃO EM TEMPO REAL DO CARDÁPIO & ATUALIZAÇÃO DO MENU
+## 🎯 v2.8.3 — MERMAID & RESILIÊNCIA DA PERSISTÊNCIA DO CARDÁPIO
+- **Mermaid.js Integrado**:
+  - Pacote npm `mermaid` instalado.
+  - Documentação completa em `docs/ARQUITETURA.md` (6 diagramas C4 e de sequência).
+  - Visualizador interativo em `docs/arquitetura-mermaid.html` acessível via `/arquitetura` e `/docs`.
+- **Persistência Auto-Migrável do Cardápio (`server.mjs`)**:
+  - Leitura do cardápio com auto-migração: garante que novos itens (como 1/2 Salaminho) e preços atualizados (Coca e Guaraná R$ 13,99) sejam mesclados e persistidos mesmo em discos efêmeros.
+- **Feedback Imediato no Admin (`index.html` + `store.js`)**:
+  - Tratamento de status e toasts claros informando se o item foi sincronizado com sucesso no backend ou se houve recusa de autenticação/rede.
 ### ✅ SINCRONIZAÇÃO MULTI-CLIENTES DO CARDÁPIO
 - **Backend Centralizado (`server.mjs`)**:
   - Persistência atômica do catálogo em `LOGS/cardapio.json`.

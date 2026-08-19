@@ -67,6 +67,12 @@ try {
   const rQr = await fetch(BASE + '/images/qrcode-pizzadorocha.png');
   test('Imagem do QR Code Awwwards servida (HTTP 200)', rQr.status === 200);
 
+  const rCocaImg = await fetch(BASE + '/images/coca-cola-2l.jpg');
+  test('Foto realista Coca-Cola 2L servida (HTTP 200)', rCocaImg.status === 200);
+
+  const rGuaranaImg = await fetch(BASE + '/images/guarana-antarctica-2l.jpg');
+  test('Foto realista Guaraná Antarctica 2L servida (HTTP 200)', rGuaranaImg.status === 200);
+
   // ── 2. SEGURANÇA E HARDENING (MDCA EIXO 5) ──
   console.log('\n[2/5] Testando Blindagem e Segurança HTTP...');
   const rSec1 = await fetch(BASE + '/server-config.json');

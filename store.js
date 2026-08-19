@@ -2,7 +2,7 @@
 // Persistência: localStorage. Usado por todas as páginas via <script type="module">.
 
 const KEY = 'pizzariaRochaDB';
-const MENU_VERSION = 6;
+const MENU_VERSION = 7;
 // A senha real do painel vive SOMENTE no servidor (ADMIN_PASS / POST /api/admin/login).
 // O que sobra aqui é só um resumo (FNV-1a) — não permite recuperar a senha original.
 const ADMIN_PASS_HASH = '7481eb56';
@@ -57,9 +57,9 @@ const FOTO_KEYWORDS = [
   [/quatro|4 queijo|4queijo|especial|premium/i, 'images/pizza-especial-rocha.jpg'],
   [/portug|lombo|presunto|ovo/i, 'images/pizza-portuguesa.jpg'],
   [/frango|catupiry|chicken/i, 'images/pizza-frango.jpg'],
-  // Bebidas (imagens ilustrativas em ./images, sempre marcadas como "Ilustrativa" na UI)
-  [/col(a|a)|refrigerante|fanta|sprite|pepsi|lata/i, 'images/bebida-cola.svg'],
-  [/guaran[aá]|antarctica/i, 'images/bebida-guarana.svg'],
+  // Bebidas (fotos reais de alta resolução nível Awwwards)
+  [/col(a|a)|refrigerante|fanta|sprite|pepsi|lata/i, 'images/coca-cola-2l.jpg'],
+  [/guaran[aá]|antarctica/i, 'images/guarana-antarctica-2l.jpg'],
 ];
 
 export function photoFor(nome, categoria, foto) {
@@ -97,8 +97,8 @@ function seedItems() {
 // ---- Seed: bebidas iniciais (entram junto do cardápio na primeira vez / migração) ----
 function seedBebidas() {
   const base = [
-    ['Coca-Cola · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.', 'images/bebida-cola.svg', 120],
-    ['Guaraná Antarctica · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.', 'images/bebida-guarana.svg', 120],
+    ['Coca-Cola · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.', 'images/coca-cola-2l.jpg', 120],
+    ['Guaraná Antarctica · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.', 'images/guarana-antarctica-2l.jpg', 120],
   ];
   return base.map(([nome, categoria, preco, descricao, foto, estoque], i) => ({
     id: 'bebida_propaganda_' + i,
@@ -118,10 +118,10 @@ function load() {
     if (!raw) { const db = defaultDB(); save(db); return db; }
     const db = JSON.parse(raw);
     if (db.menuVersion !== MENU_VERSION) {
-      // Migração: remove água e suco, adiciona novos itens do seed e atualiza bebidas para 2 Litros a R$ 13,99
+      // Migração: remove água e suco, adiciona novos itens do seed e atualiza bebidas para 2 Litros a R$ 13,99 com fotos reais
       let atuais = (db.items || []).filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
       
-      // Atualiza refrigerantes existentes para 2 Litros e R$ 13,99
+      // Atualiza refrigerantes existentes para 2 Litros, R$ 13,99 e fotos reais
       atuais = atuais.map(i => {
         if (/coca/i.test(i?.nome || '')) {
           return {
@@ -129,6 +129,7 @@ function load() {
             nome: 'Coca-Cola · 2 Litros',
             categoria: 'Bebidas · 2 Litros',
             preco: 13.99,
+            foto: 'images/coca-cola-2l.jpg',
             descricao: 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.'
           };
         }
@@ -138,6 +139,7 @@ function load() {
             nome: 'Guaraná Antarctica · 2 Litros',
             categoria: 'Bebidas · 2 Litros',
             preco: 13.99,
+            foto: 'images/guarana-antarctica-2l.jpg',
             descricao: 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.'
           };
         }

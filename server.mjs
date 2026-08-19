@@ -113,8 +113,8 @@ function obterCardapioPadrao() {
     { id: 'propaganda_7', nome: 'Marguerita · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', foto: 'images/pizza-margherita.jpg', estoque: 999, ativo: true, destaque: false },
     { id: 'propaganda_8', nome: '1/2 Salaminho e 1/2 Lombinho Canadense · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', foto: 'images/pizza-meio-salaminho-lombinho.jpg', estoque: 999, ativo: true, destaque: true },
     { id: 'propaganda_9', nome: '1/2 Salaminho e 1/2 Lombinho Canadense · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', foto: 'images/pizza-meio-salaminho-lombinho.jpg', estoque: 999, ativo: true, destaque: false },
-    { id: 'bebida_propaganda_0', nome: 'Coca-Cola · 2 Litros', categoria: 'Bebidas · 2 Litros', preco: 13.99, descricao: 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.', foto: 'images/bebida-cola.svg', estoque: 120, ativo: true, destaque: false },
-    { id: 'bebida_propaganda_1', nome: 'Guaraná Antarctica · 2 Litros', categoria: 'Bebidas · 2 Litros', preco: 13.99, descricao: 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.', foto: 'images/bebida-guarana.svg', estoque: 120, ativo: true, destaque: false },
+    { id: 'bebida_propaganda_0', nome: 'Coca-Cola · 2 Litros', categoria: 'Bebidas · 2 Litros', preco: 13.99, descricao: 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.', foto: 'images/coca-cola-2l.jpg', estoque: 120, ativo: true, destaque: false },
+    { id: 'bebida_propaganda_1', nome: 'Guaraná Antarctica · 2 Litros', categoria: 'Bebidas · 2 Litros', preco: 13.99, descricao: 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.', foto: 'images/guarana-antarctica-2l.jpg', estoque: 120, ativo: true, destaque: false },
   ];
 }
 
@@ -126,7 +126,7 @@ function lerCardapio() {
         // 1. Remove qualquer resíduo de água e suco
         let limpo = arr.filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
         
-        // 2. Atualiza nomes, categorias, descrições e preços dos refrigerantes para 2 Litros e R$ 13,99
+        // 2. Atualiza nomes, categorias, descrições, preços e fotos dos refrigerantes para 2 Litros e R$ 13,99
         limpo = limpo.map(i => {
           if (/coca/i.test(i?.nome || '')) {
             return {
@@ -134,6 +134,7 @@ function lerCardapio() {
               nome: 'Coca-Cola · 2 Litros',
               categoria: 'Bebidas · 2 Litros',
               preco: 13.99,
+              foto: 'images/coca-cola-2l.jpg',
               descricao: 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.'
             };
           }
@@ -143,6 +144,7 @@ function lerCardapio() {
               nome: 'Guaraná Antarctica · 2 Litros',
               categoria: 'Bebidas · 2 Litros',
               preco: 13.99,
+              foto: 'images/guarana-antarctica-2l.jpg',
               descricao: 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.'
             };
           }

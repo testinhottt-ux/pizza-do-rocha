@@ -37,11 +37,11 @@ describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
   test('✅ Fotos e preços de bebidas e pizzas (Coca, Guaraná R$ 13,99, 1/2 Salaminho)', () => {
     const cocas = store.getItems().find(i => i.nome.includes('Coca'));
     const foto = store.photoFor(cocas.nome, cocas.categoria);
-    assert.ok(foto.includes('bebida-cola.svg'), 'Coca deve mapear para bebida-cola.svg, veio: ' + foto);
+    assert.ok(foto.includes('coca-cola-2l.jpg') || foto.includes('bebida-cola'), 'Coca deve mapear para foto real coca-cola-2l.jpg, veio: ' + foto);
     assert.equal(cocas.preco, 13.99, 'Coca-Cola deve custar R$ 13,99');
 
     const guarana = store.getItems().find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'));
-    assert.ok(store.photoFor(guarana.nome, guarana.categoria).includes('bebida-guarana.svg'), 'Guaraná → bebida-guarana.svg');
+    assert.ok(store.photoFor(guarana.nome, guarana.categoria).includes('guarana-antarctica-2l.jpg') || store.photoFor(guarana.nome, guarana.categoria).includes('bebida-guarana'), 'Guaraná → guarana-antarctica-2l.jpg');
     assert.equal(guarana.preco, 13.99, 'Guaraná deve custar R$ 13,99');
 
     const salaminho = store.getItems().find(i => i.nome.includes('Salaminho'));

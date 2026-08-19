@@ -44,7 +44,7 @@ export function renderFooter() {
         <a href="Home.dc.html#contato">Contato</a>
       </div>
     </div>
-    <p class="note">Atendimento: ${esc(CONTATO.horario)} · Entrega rápida · WhatsApp e iFood.</p>
+    <p class="note">Atendimento: ${esc(CONTATO.horario)} · Entrega rápida · WhatsApp e Site Oficial.</p>
   </footer>`;
 }
 

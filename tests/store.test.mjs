@@ -211,7 +211,37 @@ test('photoFor é determinística e mapeia por palavra-chave', () => {
 
 test('FOTOS aponta para arquivos dentro de images/', () => {
   assert.ok(store.FOTOS.hero.startsWith('images/'));
-  assert.equal(store.FOTOS.galeria.length, 6);
+  assert.equal(store.FOTOS.galeria.length, 7);
+  assert.equal(store.FOTOS.historia, 'images/pizza-meio-salaminho-lombinho.jpg');
+});
+
+test('Cardápio contém 1/2 Salaminho e 1/2 Lombinho Canadense com foto', () => {
+  const items = store.getItems();
+  const salaminhoMedia = items.find(i => i.nome.includes('Salaminho') && i.nome.includes('Média'));
+  const salaminhoGigante = items.find(i => i.nome.includes('Salaminho') && i.nome.includes('Gigante'));
+  
+  assert.ok(salaminhoMedia, 'Deve conter pizza 1/2 Salaminho e 1/2 Lombinho Média');
+  assert.ok(salaminhoGigante, 'Deve conter pizza 1/2 Salaminho e 1/2 Lombinho Gigante');
+  assert.equal(salaminhoMedia.preco, 49.99);
+  assert.equal(salaminhoGigante.preco, 59.99);
+  assert.equal(salaminhoMedia.foto, 'images/pizza-meio-salaminho-lombinho.jpg');
+  assert.equal(store.photoFor(salaminhoMedia.nome, salaminhoMedia.categoria), 'images/pizza-meio-salaminho-lombinho.jpg');
+});
+
+test('Bebidas contém somente Coca-Cola e Guaraná Antarctica com valor 13.99 e sem água', () => {
+  const items = store.getItems();
+  const bebidas = items.filter(i => i.categoria === 'Bebidas');
+  
+  assert.equal(bebidas.length, 2, 'Deve conter exatamente 2 bebidas');
+  const coca = bebidas.find(i => i.nome.includes('Coca'));
+  const guarana = bebidas.find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'));
+  const agua = items.find(i => /[áa]gua|mineral/i.test(i.nome));
+  
+  assert.ok(coca, 'Deve ter Coca-Cola');
+  assert.ok(guarana, 'Deve ter Guaraná Antarctica');
+  assert.equal(coca.preco, 13.99, 'Coca-Cola deve custar 13.99');
+  assert.equal(guarana.preco, 13.99, 'Guaraná Antarctica deve custar 13.99');
+  assert.equal(agua, undefined, 'Água não deve existir no cardápio');
 });
 
 test('saveItem armazena e recupera foto customizada do produto', () => {

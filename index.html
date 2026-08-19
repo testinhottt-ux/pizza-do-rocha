@@ -170,7 +170,7 @@
 
   <div style="background:var(--fogo);color:var(--carvao);display:flex;flex-wrap:wrap;gap:clamp(16px, 4vw, 48px);justify-content:center;align-items:center;padding:clamp(16px, 3vw, 24px) clamp(20px, 5vw, 40px);font-weight:700;font-size:clamp(13px, 2.5vw, 15px);">
      <a id="topBarPhoneLink" href="https://wa.me/5531991867625" style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:6px;transition:transform 0.2s;">📞 (31) 99186-7625</a>
-     <span>🛵 Entrega rápida · WhatsApp ou iFood</span>
+     <span>🛵 Entrega rápida · WhatsApp e Site Oficial</span>
      <span>🕒 18h às 21h</span>
   </div>
 
@@ -179,11 +179,11 @@
        <span>PIZZARIA DELIVERY</span>
        <span>SABOR E QUALIDADE</span>
        <span>ENTREGA RÁPIDA</span>
-       <span>PEÇA PELO WHATSAPP OU IFOOD</span>
+       <span>PEÇA PELO SITE OU WHATSAPP</span>
        <span>PIZZARIA DELIVERY</span>
        <span>SABOR E QUALIDADE</span>
        <span>ENTREGA RÁPIDA</span>
-       <span>PEÇA PELO WHATSAPP OU IFOOD</span>
+       <span>PEÇA PELO SITE OU WHATSAPP</span>
     </div>
   </div>
 
@@ -219,7 +219,7 @@
     <div class="bento">
         <div class="bento-item" data-reveal><div class="meta">01</div><h3>Escolha o sabor</h3><p>Portuguesa (à moda), Calabresa, Presunto com muçarela ou Marguerita.</p></div>
        <div class="bento-item" data-reveal><div class="meta">02</div><h3>Escolha o tamanho</h3><p>Pizza média de 30 cm com 6 pedaços ou gigante de 35 cm com 8 pedaços.</p></div>
-       <div class="bento-item" data-reveal><div class="meta">03</div><h3>Receba com rapidez</h3><p>Peça pelo WhatsApp ou iFood das 18h às 21h.</p></div>
+       <div class="bento-item" data-reveal><div class="meta">03</div><h3>Receba com rapidez</h3><p>Peça pelo WhatsApp ou direto no site das 18h às 21h.</p></div>
     </div>
   </section>
 
@@ -242,7 +242,7 @@
             <span class="contact-ic" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
             </span>
-             <div class="contact-body"><span class="contact-label">Entrega</span><span class="contact-value">Rápida · WhatsApp ou iFood</span></div>
+             <div class="contact-body"><span class="contact-label">Entrega</span><span class="contact-value">Rápida · WhatsApp e Site Oficial</span></div>
           </div>
           <div class="contact-item" data-reveal>
             <span class="contact-ic" aria-hidden="true">
@@ -261,7 +261,7 @@
       </div>
       <div style="display:flex;flex-direction:column;justify-content:space-between;min-height:340px;padding:42px;background:linear-gradient(145deg,var(--carvao2),#0f0b0a);border:1px solid rgba(244,237,225,0.12);border-radius:8px;">
         <div><span style="display:block;color:var(--fogo);font-size:13px;font-weight:800;letter-spacing:3px;margin-bottom:20px;">ENTREGA DO ROCHA</span><strong style="display:block;font-family:'Bebas Neue';font-size:clamp(42px,7vw,72px);line-height:.95;color:var(--creme);">QUENTE.<br>RÁPIDA.<br>DO SEU JEITO.</strong></div>
-        <span style="color:var(--areia);font-size:16px;line-height:1.6;">WhatsApp ou iFood<br>Atendimento das 18h às 21h</span>
+        <span style="color:var(--areia);font-size:16px;line-height:1.6;">WhatsApp e Site Oficial<br>Atendimento das 18h às 21h</span>
       </div>
     </div>
   </section>
@@ -1143,6 +1143,7 @@
 
   // ===== HOME PAGE =====
   async function renderHome() {
+    try { await store.syncCardapioComServidor(); } catch (e) {}
     const featured = store.getDestaques();
     const container = document.getElementById('featuredProducts');
     if (!container) return;
@@ -1310,6 +1311,7 @@
     showToast('Pizza personalizada adicionada! <a href="#" onclick="goToPage(\'carrinho\')" style="color:var(--fogo);font-weight:700;">Ver carrinho</a>');
   };
   async function renderCardapio() {
+    try { await store.syncCardapioComServidor(); } catch (e) {}
     const items = store.getItems().filter(i => i.ativo !== false);
     const cats = ['Todas', ...Array.from(new Set(items.map(i => i.categoria).filter(Boolean)))];
     
@@ -1986,14 +1988,17 @@ const nome = document.getElementById('clienteNome').value.trim();
       }
     };
 
-    window.toggleAdminItemDestaque = function(id) {
+    window.toggleAdminItemDestaque = async function(id) {
       const item = store.toggleDestaque(id);
+      if (item) {
+        await store.saveItemNoServidor(item, adminPassword);
+      }
       renderAdminCardapio();
       renderHome();
       showToast(item?.destaque ? '⭐ Item adicionado aos anúncios da Página Inicial!' : 'Item removido dos anúncios da Página Inicial.');
     };
 
-    window.submitAdminForm = function() {
+    window.submitAdminForm = async function() {
       const nome = document.getElementById('formNome').value.trim();
       const categoria = document.getElementById('formCategoria').value.trim() || 'Tradicionais';
       const preco = parseFloat(document.getElementById('formPreco').value) || 0;
@@ -2012,11 +2017,11 @@ const nome = document.getElementById('clienteNome').value.trim();
         nome, categoria, preco, descricao, estoque, foto, destaque, ativo: true
       };
 
-      store.saveItem(item);
+      await store.saveItemNoServidor(item, adminPassword);
       clearAdminForm();
       renderAdminCardapio();
       renderHome();
-      showToast(editingItemId ? 'Produto atualizado!' : 'Produto adicionado!');
+      showToast(editingItemId ? 'Produto atualizado no cardápio de todos!' : 'Produto adicionado ao cardápio de todos!');
     };
 
     window.editAdminItem = function(id) {
@@ -2049,26 +2054,29 @@ const nome = document.getElementById('clienteNome').value.trim();
       clearAdminForm();
     };
 
-    window.deleteAdminItem = function(id) {
+    window.deleteAdminItem = async function(id) {
       if (confirm('Tem certeza?')) {
-        store.deleteItem(id);
+        await store.deleteItemNoServidor(id, adminPassword);
         renderAdminCardapio();
         renderHome();
-        showToast('Produto deletado!');
+        showToast('Produto deletado com sucesso!');
       }
     };
 
-    window.toggleAdminItemAtivo = function(id) {
+    window.toggleAdminItemAtivo = async function(id) {
       const item = store.getItems().find(i => i.id === id);
       if (item) {
-        store.saveItem({ ...item, ativo: !item.ativo });
+        await store.saveItemNoServidor({ ...item, ativo: !item.ativo }, adminPassword);
         renderAdminCardapio();
         renderHome();
       }
     };
 
-    window.adjustStockAdmin = function(id, delta) {
-      store.adjustStock(id, delta);
+    window.adjustStockAdmin = async function(id, delta) {
+      const item = store.adjustStock(id, delta);
+      if (item) {
+        await store.saveItemNoServidor(item, adminPassword);
+      }
       renderAdminEstoque();
     };
 

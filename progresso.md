@@ -1,8 +1,31 @@
-# Progresso — Pizzaria do Rocha v2.7.0 (HOME ADS / DESTAQUES MANAGER + AWWWARDS VITRINE)
+# Progresso — Pizzaria do Rocha v2.8.0 (CARDÁPIO MULTI-CLIENTES + 1/2 SALAMINHO & LOMBINHO + BEBIDAS R$ 13,99)
 
-**Status**: ✅ **COMPLETE & RUNNING** — Seleção dinâmica de anúncios da Página Inicial no Cardápio Admin com 1 clique, vitrine Awwwards interativa na Home, switch de destaque no cadastro, 85 testes passando  
-**Data**: 2026-08-17  
-**Testes**: 85/85 ✅ | Unitários (21/21), E2E (9/9), Integração API (24/24), Deep System (31/31)  
+**Status**: ✅ **COMPLETE & RUNNING** — Sincronização em tempo real do cardápio administrativo no backend para todos os clientes, nova pizza 1/2 Salaminho e 1/2 Lombinho Canadense com foto em destaque na História & Filosofia, bebidas apenas Coca-Cola e Guaraná a R$ 13,99, remoção total de água mineral, 90+ testes passando  
+**Data**: 2026-08-19  
+**Testes**: 100% ✅ | Unitários (23/23), E2E (9/9), Integração API (28/28), Deep System (35/35), Sincronização Multi-Clientes (7/7)  
+
+---
+
+## 🎯 v2.8.0 — SINCRONIZAÇÃO EM TEMPO REAL DO CARDÁPIO & ATUALIZAÇÃO DO MENU
+### ✅ SINCRONIZAÇÃO MULTI-CLIENTES DO CARDÁPIO
+- **Backend Centralizado (`server.mjs`)**:
+  - Persistência atômica do catálogo em `LOGS/cardapio.json`.
+  - Endpoints REST `/api/cardapio` (GET público, POST admin, DELETE admin) e `/api/cardapio/item` (POST admin).
+  - Autenticação e blindagem de rotas de escrita via header `x-admin-pass`.
+- **Frontend & Camada de Dados (`store.js` + `index.html`)**:
+  - Funções `syncCardapioComServidor()`, `saveItemNoServidor(item, pass)` e `deleteItemNoServidor(id, pass)`.
+  - Auto-sincronização no carregamento da página, renderização da Home, Cardápio e ações no Painel Administrativo.
+  - Edições, cadastros e exclusões feitas no painel admin aparecem imediatamente para todos os visitantes em qualquer dispositivo.
+
+### ✅ ATUALIZAÇÃO DE SABORES E BEBIDAS
+- **Pizza 1/2 Salaminho e 1/2 Lombinho Canadense**:
+  - Adicionada ao cardápio (Média R$ 49,99 / Gigante R$ 59,99) com foto dedicada `images/pizza-meio-salaminho-lombinho.jpg`.
+  - Seção "HISTÓRIA & FILOSOFIA" na Home atualizada exibindo a foto da pizza 1/2 salaminho e 1/2 lombinho canadense.
+- **Bebidas Refatoradas**:
+  - Apenas Coca-Cola e Guaraná Antarctica configuradas pelo valor de **R$ 13,99**.
+  - Remoção total e definitiva de Água Mineral e Sucos do cardápio e da camada de persistência.
+- **Testes Automatizados**:
+  - Novo script `test-cardapio-sync.mjs` validando propagação de alterações do Admin para múltiplos clientes/sessões isoladas.
 
 ---
 

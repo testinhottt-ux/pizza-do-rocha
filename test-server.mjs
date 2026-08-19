@@ -103,6 +103,30 @@ try {
   ok('cliente acompanha o próprio pedido', consulta.status === 200 && consulta.body?.pedido?.status === 'preparando', JSON.stringify(consulta.body?.pedido?.status));
   ok('consulta pública não expõe endereço', consulta.body?.pedido?.cliente === undefined, JSON.stringify(Object.keys(consulta.body?.pedido || {})));
 
+  // ── Sincronização do Cardápio (Multi-Clientes & Painel do Dono) ──
+  const getCardapio = await req('GET', '/api/cardapio');
+  const itemsSrv = getCardapio.body?.items || [];
+  const temSalaminho = itemsSrv.some(i => i.nome.includes('Salaminho'));
+  const semAgua = !itemsSrv.some(i => /[áa]gua|mineral/i.test(i.nome));
+  const cocaSrv = itemsSrv.find(i => i.nome.includes('Coca'));
+  const guaranaSrv = itemsSrv.find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'));
+  ok('GET /api/cardapio retorna catálogo compartilhado com 1/2 Salaminho', getCardapio.status === 200 && temSalaminho && semAgua, `itens=${itemsSrv.length}`);
+  ok('Coca e Guaraná custam 13.99 no servidor', cocaSrv?.preco === 13.99 && guaranaSrv?.preco === 13.99, `coca=${cocaSrv?.preco}, guarana=${guaranaSrv?.preco}`);
+
+  const postCardapioSemSenha = await req('POST', '/api/cardapio/item', { item: { nome: 'Pizza Nova Hack', preco: 10 } });
+  ok('POST /api/cardapio/item sem senha → 401', postCardapioSemSenha.status === 401, JSON.stringify(postCardapioSemSenha.body));
+
+  const postCardapioAdmin = await req('POST', '/api/cardapio/item', { item: { id: 'pizza_especial_sync', nome: 'Pizza Nova Especial Sync', preco: 65.5, categoria: 'Especiais', estoque: 15, ativo: true } }, { 'x-admin-pass': 'pizzadorochaboademais' });
+  ok('Admin adiciona/atualiza item no cardápio do servidor', postCardapioAdmin.status === 200 && postCardapioAdmin.body?.item?.nome === 'Pizza Nova Especial Sync', JSON.stringify(postCardapioAdmin.body?.item?.id));
+
+  // Visitante comum enxerga imediatamente o item adicionado pelo Admin
+  const getCardapioPublico = await req('GET', '/api/cardapio');
+  ok('Visitante comum vê item editado pelo admin em tempo real', getCardapioPublico.body?.items?.some(i => i.id === 'pizza_especial_sync'), 'visível para todos');
+
+  // Admin deleta o item de teste
+  const delItemAdmin = await req('DELETE', '/api/cardapio/pizza_especial_sync', null, { 'x-admin-pass': 'pizzadorochaboademais' });
+  ok('Admin deleta item do cardápio', delItemAdmin.status === 200 && !delItemAdmin.body?.items?.some(i => i.id === 'pizza_especial_sync'), 'deletado com sucesso');
+
   // WhatsApp endpoints
   const waStatus = await req('GET', '/api/whatsapp/status');
   ok('GET /api/whatsapp/status', waStatus.status === 200, JSON.stringify(waStatus.body));

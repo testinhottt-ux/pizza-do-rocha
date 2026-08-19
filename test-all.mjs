@@ -23,21 +23,30 @@ globalThis.localStorage = new LocalStorageMock();
 const store = await import('./store.js');
 
 describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
-  test('✅ Carregamento inicial com seed', () => {
+  test('✅ Carregamento inicial com seed (10 pizzas + 2 bebidas R$ 13,99 sem água)', () => {
     const items = store.getItems();
     assert.ok(items.length > 0, 'Deve ter itens seedados');
-    assert.equal(items.length, 12, 'Deve ter 12 opções (8 pizzas + 4 bebidas)');
-    assert.ok(items.filter(i => i.categoria === 'Bebidas').length >= 4, 'Seed inclui bebidas');
-    console.log(`   ✓ ${items.length} produtos: ${items.filter(i => i.categoria === 'Bebidas').length} bebidas + ${items.length - items.filter(i => i.categoria === 'Bebidas').length} pizzas`);
+    assert.equal(items.length, 12, 'Deve ter 12 opções (10 pizzas + 2 bebidas)');
+    const bebidas = items.filter(i => i.categoria === 'Bebidas');
+    assert.equal(bebidas.length, 2, 'Seed inclui exatamente 2 bebidas');
+    assert.ok(!items.some(i => /[áa]gua|mineral/i.test(i.nome)), 'Água removida do cardápio');
+    assert.ok(items.some(i => i.nome.includes('Salaminho')), 'Pizza 1/2 Salaminho e 1/2 Lombinho presente');
+    console.log(`   ✓ ${items.length} produtos: ${bebidas.length} bebidas + ${items.length - bebidas.length} pizzas`);
   });
 
-  test('✅ Fotos de bebidas (ilustrativas) são resolvidas', () => {
+  test('✅ Fotos e preços de bebidas e pizzas (Coca, Guaraná R$ 13,99, 1/2 Salaminho)', () => {
     const cocas = store.getItems().find(i => i.nome.includes('Coca'));
     const foto = store.photoFor(cocas.nome, cocas.categoria);
     assert.ok(foto.includes('bebida-cola.svg'), 'Coca deve mapear para bebida-cola.svg, veio: ' + foto);
-    const suco = store.getItems().find(i => i.nome.includes('Suco'));
-    assert.ok(store.photoFor(suco.nome, suco.categoria).includes('bebida-suco.svg'), 'Suco → bebida-suco.svg');
-    console.log(`   ✓ Coca → ${foto}`);
+    assert.equal(cocas.preco, 13.99, 'Coca-Cola deve custar R$ 13,99');
+
+    const guarana = store.getItems().find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'));
+    assert.ok(store.photoFor(guarana.nome, guarana.categoria).includes('bebida-guarana.svg'), 'Guaraná → bebida-guarana.svg');
+    assert.equal(guarana.preco, 13.99, 'Guaraná deve custar R$ 13,99');
+
+    const salaminho = store.getItems().find(i => i.nome.includes('Salaminho'));
+    assert.ok(store.photoFor(salaminho.nome, salaminho.categoria).includes('pizza-meio-salaminho-lombinho.jpg'));
+    console.log(`   ✓ Coca (R$ ${cocas.preco}) → ${foto} | Guaraná (R$ ${guarana.preco}) | Salaminho → ${salaminho.foto}`);
   });
 
   test('✅ Contato e informações', () => {

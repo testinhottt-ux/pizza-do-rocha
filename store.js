@@ -2,7 +2,7 @@
 // Persistência: localStorage. Usado por todas as páginas via <script type="module">.
 
 const KEY = 'pizzariaRochaDB';
-const MENU_VERSION = 4;
+const MENU_VERSION = 5;
 // A senha real do painel vive SOMENTE no servidor (ADMIN_PASS / POST /api/admin/login).
 // O que sobra aqui é só um resumo (FNV-1a) — não permite recuperar a senha original.
 const ADMIN_PASS_HASH = '7481eb56';
@@ -30,7 +30,7 @@ export const CONTATO = {
   mapsUrl: '',
   mapEmbed: '',
   horario: 'Todos os dias · 18h às 21h',
-  entrega: 'Entrega rápida · peça pelo WhatsApp ou iFood',
+  entrega: 'Entrega rápida · peça pelo site ou WhatsApp',
 };
 
 // ---- Fotos ilustrativas (baixadas em ./images) ----
@@ -45,10 +45,12 @@ export const FOTOS = {
     'images/pizza-frango.jpg',
     'images/pizza-mussarela-artesanal.jpg',
     'images/pizza-especial-rocha.jpg',
+    'images/pizza-meio-salaminho-lombinho.jpg',
   ],
 };
 
 const FOTO_KEYWORDS = [
+  [/salaminho|lombinho/i, 'images/pizza-meio-salaminho-lombinho.jpg'],
   [/marg|mussar|muçar|queijo|napolit/i, 'images/pizza-margherita.jpg'],
   [/pepper|peperoni|pepperoni/i, 'images/pizza-pepperoni.jpg'],
   [/calabr|lingu|bacon/i, 'images/pizza-calabresa.jpg'],
@@ -56,10 +58,8 @@ const FOTO_KEYWORDS = [
   [/portug|lombo|presunto|ovo/i, 'images/pizza-portuguesa.jpg'],
   [/frango|catupiry|chicken/i, 'images/pizza-frango.jpg'],
   // Bebidas (imagens ilustrativas em ./images, sempre marcadas como "Ilustrativa" na UI)
-  [/col(a|a)|refrigerante|fanta|sprite|pepsi|cerveja|lata/i, 'images/bebida-cola.svg'],
-  [/guaran[aá]|antarctica|schin/i, 'images/bebida-guarana.svg'],
-  [/suco|laranja|maracuj[aá]|abacaxi|natural/i, 'images/bebida-suco.svg'],
-  [/[áa]gua|mineral|garrafa|h2o/i, 'images/bebida-agua.svg'],
+  [/col(a|a)|refrigerante|fanta|sprite|pepsi|lata/i, 'images/bebida-cola.svg'],
+  [/guaran[aá]|antarctica/i, 'images/bebida-guarana.svg'],
 ];
 
 export function photoFor(nome, categoria, foto) {
@@ -83,22 +83,22 @@ function seedItems() {
     ['Presunto com muçarela · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', 'images/pizza-mussarela-artesanal.jpg'],
     ['Marguerita · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', 'images/pizza-margherita.jpg'],
     ['Marguerita · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', 'images/pizza-margherita.jpg'],
+    ['1/2 Salaminho e 1/2 Lombinho Canadense · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', 'images/pizza-meio-salaminho-lombinho.jpg'],
+    ['1/2 Salaminho e 1/2 Lombinho Canadense · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', 'images/pizza-meio-salaminho-lombinho.jpg'],
   ];
   return base.map(([nome, categoria, preco, descricao, foto], i) => ({
     id: 'propaganda_' + i,
     nome, categoria, preco, descricao, foto,
     estoque: 999, ativo: true,
-    destaque: i === 0 || i === 1 || i === 3, // Destaques iniciais da Home
+    destaque: i === 0 || i === 1 || i === 8, // Destaques iniciais da Home
   }));
 }
 
 // ---- Seed: bebidas iniciais (entram junto do cardápio na primeira vez / migração) ----
 function seedBebidas() {
   const base = [
-    ['Coca-Cola Lata 350ml', 'Bebidas', 6.0, 'Refrigerante de cola gelado · lata 350 ml.', 'images/bebida-cola.svg', 120],
-    ['Guaraná Antarctica Lata 350ml', 'Bebidas', 5.5, 'Refrigerante de guaraná gelado · lata 350 ml.', 'images/bebida-guarana.svg', 120],
-    ['Suco de Laranja Natural 500ml', 'Bebidas', 8.0, 'Suco de laranja natural, gelado · copo 500 ml.', 'images/bebida-suco.svg', 60],
-    ['Água Mineral 500ml', 'Bebidas', 4.0, 'Água mineral sem gás · garrafa 500 ml.', 'images/bebida-agua.svg', 100],
+    ['Coca-Cola', 'Bebidas', 13.99, 'Refrigerante de cola gelado.', 'images/bebida-cola.svg', 120],
+    ['Guaraná Antarctica', 'Bebidas', 13.99, 'Refrigerante de guaraná gelado.', 'images/bebida-guarana.svg', 120],
   ];
   return base.map(([nome, categoria, preco, descricao, foto, estoque], i) => ({
     id: 'bebida_propaganda_' + i,
@@ -118,11 +118,21 @@ function load() {
     if (!raw) { const db = defaultDB(); save(db); return db; }
     const db = JSON.parse(raw);
     if (db.menuVersion !== MENU_VERSION) {
-      // Migração NÃO destrói o cardápio customizado nem os pedidos:
-      // mantém os itens atuais e apenas adiciona bebidas que ainda não existem.
-      const atuais = db.items || [];
-      const sobrando = seedBebidas().filter(b => !atuais.some(i => i?.nome === b.nome));
-      const migrated = { ...db, items: [...atuais, ...sobrando], seeded: true, menuVersion: MENU_VERSION };
+      // Migração: remove água e suco, adiciona novos itens do seed e atualiza bebidas para R$ 13,99
+      let atuais = (db.items || []).filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
+      
+      // Atualiza preços de refrigerantes existentes para 13.99
+      atuais = atuais.map(i => {
+        if (/coca/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
+        if (/guaran[aá]/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
+        return i;
+      });
+
+      // Adiciona itens do seed que ainda não existem
+      const todosSeeds = [...seedItems(), ...seedBebidas()];
+      const novos = todosSeeds.filter(s => !atuais.some(i => i?.nome === s.nome));
+      
+      const migrated = { ...db, items: [...atuais, ...novos], seeded: true, menuVersion: MENU_VERSION };
       save(migrated);
       return migrated;
     }
@@ -354,4 +364,75 @@ export function updateContatoTelefone(novoNumero) {
     encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.');
   return CONTATO;
 }
+
+// ---- Sincronização de Cardápio com o Servidor (Multi-Usuários) ----
+export async function syncCardapioComServidor() {
+  if (typeof fetch === 'undefined') return getItems();
+  try {
+    const res = await fetch('/api/cardapio', { cache: 'no-store' });
+    if (!res.ok) return getItems();
+    const data = await res.json();
+    if (data && Array.isArray(data.items) && data.items.length > 0) {
+      const db = load();
+      db.items = data.items;
+      db.menuVersion = MENU_VERSION;
+      save(db);
+      return db.items;
+    }
+  } catch (e) {
+    // Offline / fallback local
+  }
+  return getItems();
+}
+
+export async function saveItemNoServidor(item, adminPass) {
+  const localSaved = saveItem(item);
+  if (typeof fetch !== 'undefined') {
+    try {
+      const pass = adminPass || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin_pass') : '');
+      const headers = { 'Content-Type': 'application/json' };
+      if (pass) headers['x-admin-pass'] = pass;
+      const res = await fetch('/api/cardapio/item', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ item: localSaved })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.items) {
+          const db = load();
+          db.items = data.items;
+          save(db);
+        }
+      }
+    } catch (e) {
+      // Ignora falha se offline
+    }
+  }
+  return localSaved;
+}
+
+export async function deleteItemNoServidor(id, adminPass) {
+  deleteItem(id);
+  if (typeof fetch !== 'undefined') {
+    try {
+      const pass = adminPass || (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('admin_pass') : '');
+      const headers = {};
+      if (pass) headers['x-admin-pass'] = pass;
+      const res = await fetch(`/api/cardapio/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.items) {
+          const db = load();
+          db.items = data.items;
+          save(db);
+        }
+      }
+    } catch (e) {}
+  }
+}
+
 

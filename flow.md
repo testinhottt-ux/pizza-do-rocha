@@ -147,14 +147,19 @@ PAINEL ADMINISTRATIVO & GESTÃO (index.html #adminPage)
   - `lerConfig()`, `salvarConfig(patch)` — Gerenciamento do `server-config.json`
   - `lerPedidos()`, `salvarPedidos(lista)` — CRUD atômico de pedidos em `LOGS/pedidos.json`
   - `lerCompradores()`, `salvarCompradores(map)`, `registrarComprador()`, `removerComprador()` — Persistência temporária de compradores com TTL
+  - `lerPedidos()`, `salvarPedidos(lista)` — Persistência atômica de pedidos em `LOGS/pedidos.json`
+  - `lerCardapio()`, `salvarCardapio(lista)`, `obterCardapioPadrao()` — Persistência atômica do cardápio em `LOGS/cardapio.json`
   - `ehAdmin(req)` — Validação de header `x-admin-pass`
   - `enviarMensagensPagamentoConfirmado(orderNsu, buyer, raw)` — Orquestração de envio de comprovantes via Baileys
 
 ### Módulo: `store.js`
-- **Funções de Catálogo**:
-  - `seedCatalog()` — Gera catálogo padrão com fotos e itens
-  - `load()`, `save()` — Persistência no `localStorage`
-  - `getItems()`, `getItem(id)`, `createItem(data)`, `updateItem(id, patch)`, `deleteItem(id)`
+- **Funções de Catálogo & Sincronização**:
+  - `seedItems()`, `seedBebidas()`, `defaultDB()` — Catálogo padrão com pizzas e bebidas (Coca/Guaraná R$ 13,99, 1/2 Salaminho)
+  - `load()`, `save()` — Persistência no `localStorage` com migração v5
+  - `getItems()`, `getItem(id)`, `saveItem(item)`, `deleteItem(id)`, `adjustStock(id, delta)`
+  - `syncCardapioComServidor()` — Sincroniza cardápio do backend (`GET /api/cardapio`) com a store local
+  - `saveItemNoServidor(item, adminPass)` — Salva item no backend (`POST /api/cardapio/item`) e atualiza local
+  - `deleteItemNoServidor(id, adminPass)` — Remove item no backend (`DELETE /api/cardapio/:id`) e atualiza local
 - **Funções do Carrinho**:
   - `getCart()`, `addToCart(item, qty, obs)`, `updateCartQty(itemId, qty)`, `removeFromCart(itemId)`, `clearCart()`
   - `cartCount()`, `cartTotal()`

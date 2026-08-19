@@ -173,6 +173,18 @@ try {
   test('GET /api/pedidos/:id permite cliente acompanhar status ("preparando")', consultaCli.status === 200 && consultaCli.body?.pedido?.status === 'preparando');
   test('GET /api/pedidos/:id consulta pública não expõe endereço', consultaCli.body?.pedido?.cliente === undefined);
 
+  // Sincronização multi-usuários do cardápio
+  const getCard = await req('GET', '/api/cardapio');
+  const cardItems = getCard.body?.items || [];
+  test('GET /api/cardapio entrega cardápio com 1/2 Salaminho e sem água', getCard.status === 200 && cardItems.some(i => i.nome.includes('Salaminho')) && !cardItems.some(i => /[áa]gua|mineral/i.test(i.nome)));
+  test('Bebidas custam R$ 13,99 (Coca e Guaraná)', cardItems.find(i => i.nome.includes('Coca'))?.preco === 13.99 && cardItems.find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'))?.preco === 13.99);
+
+  const postCard = await req('POST', '/api/cardapio/item', { item: { id: 'item_deep_test', nome: 'Pizza Deep Test', preco: 69.9, categoria: 'Especiais' } }, { 'x-admin-pass': 'pizzadorochaboademais' });
+  test('Admin edita cardápio no backend e persiste para todos', postCard.status === 200 && postCard.body?.item?.nome === 'Pizza Deep Test');
+  const getCardApos = await req('GET', '/api/cardapio');
+  test('Visitante comum recebe item recém-cadastrado pelo admin', getCardApos.body?.items?.some(i => i.id === 'item_deep_test'));
+  await req('DELETE', '/api/cardapio/item_deep_test', null, { 'x-admin-pass': 'pizzadorochaboademais' });
+
   // ── 5. NOTIFICAÇÕES WHATSAPP WEB (BAILEYS) ──
   console.log('\n[5/5] Testando Notificações e Módulo WhatsApp Web (Baileys)...');
   const waStatus = await req('GET', '/api/whatsapp/status');

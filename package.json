@@ -8,12 +8,13 @@
     "start": "node server.mjs",
     "dev": "node server.mjs 3000",
     "clean:port": "fuser -k 3000/tcp || true",
-    "test": "node --test tests/store.test.mjs && node test-phone-sync.mjs && node test-all.mjs && node test-server.mjs && node test-deep-system.mjs",
+    "test": "node --test tests/store.test.mjs && node test-phone-sync.mjs && node test-all.mjs && node test-server.mjs && node test-deep-system.mjs && node test-cardapio-sync.mjs",
     "test:unit": "node --test tests/store.test.mjs",
     "test:phone": "node test-phone-sync.mjs",
     "test:e2e": "node test-all.mjs",
     "test:server": "node test-server.mjs",
-    "test:deep": "node test-deep-system.mjs"
+    "test:deep": "node test-deep-system.mjs",
+    "test:sync": "node test-cardapio-sync.mjs"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc14",

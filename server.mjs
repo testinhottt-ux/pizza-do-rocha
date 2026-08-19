@@ -97,6 +97,60 @@ function ehAdmin(req) {
   const enviado = req.headers['x-admin-pass'];
   return typeof enviado === 'string' && enviado === ADMIN_PASS;
 }
+
+// ── Cardápio persistido no servidor (fonte de verdade compartilhada para todos) ──
+const CARDAPIO_FILE = path.join(LOG_DIR, 'cardapio.json');
+
+function obterCardapioPadrao() {
+  return [
+    { id: 'propaganda_0', nome: 'Portuguesa (à moda) · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Molho, presunto, cebola, pimentão, bacon, tomate, ovos, muçarela, queijo parmesão ralado, azeitona e orégano.', foto: 'images/pizza-portuguesa.jpg', estoque: 999, ativo: true, destaque: true },
+    { id: 'propaganda_1', nome: 'Portuguesa (à moda) · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Molho, presunto, cebola, pimentão, bacon, tomate, ovos, muçarela, queijo parmesão ralado, azeitona e orégano.', foto: 'images/pizza-portuguesa.jpg', estoque: 999, ativo: true, destaque: true },
+    { id: 'propaganda_2', nome: 'Calabresa · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Molho, frango desfiado, muçarela, calabresa desfiada, cebola, queijo parmesão ralado e orégano.', foto: 'images/pizza-calabresa.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_3', nome: 'Calabresa · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Molho, frango desfiado, muçarela, calabresa desfiada, cebola, queijo parmesão ralado e orégano.', foto: 'images/pizza-calabresa.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_4', nome: 'Presunto com muçarela · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', foto: 'images/pizza-mussarela-artesanal.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_5', nome: 'Presunto com muçarela · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Molho de tomate, presunto, bacon, tomate, cebola, muçarela, queijo parmesão e orégano.', foto: 'images/pizza-mussarela-artesanal.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_6', nome: 'Marguerita · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', foto: 'images/pizza-margherita.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_7', nome: 'Marguerita · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', foto: 'images/pizza-margherita.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'propaganda_8', nome: '1/2 Salaminho e 1/2 Lombinho Canadense · Média', categoria: 'Pizza média · 30 cm · 6 pedaços', preco: 49.99, descricao: 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', foto: 'images/pizza-meio-salaminho-lombinho.jpg', estoque: 999, ativo: true, destaque: true },
+    { id: 'propaganda_9', nome: '1/2 Salaminho e 1/2 Lombinho Canadense · Gigante', categoria: 'Pizza gigante · 35 cm · 8 pedaços', preco: 59.99, descricao: 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', foto: 'images/pizza-meio-salaminho-lombinho.jpg', estoque: 999, ativo: true, destaque: false },
+    { id: 'bebida_propaganda_0', nome: 'Coca-Cola', categoria: 'Bebidas', preco: 13.99, descricao: 'Refrigerante de cola gelado.', foto: 'images/bebida-cola.svg', estoque: 120, ativo: true, destaque: false },
+    { id: 'bebida_propaganda_1', nome: 'Guaraná Antarctica', categoria: 'Bebidas', preco: 13.99, descricao: 'Refrigerante de guaraná gelado.', foto: 'images/bebida-guarana.svg', estoque: 120, ativo: true, destaque: false },
+  ];
+}
+
+function lerCardapio() {
+  try {
+    if (fs.existsSync(CARDAPIO_FILE)) {
+      const arr = JSON.parse(fs.readFileSync(CARDAPIO_FILE, 'utf8'));
+      if (Array.isArray(arr) && arr.length > 0) {
+        // Limpa resíduos de água e suco se já salvos anteriormente
+        const filtrado = arr.filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
+        if (filtrado.length !== arr.length) {
+          salvarCardapio(filtrado);
+          return filtrado;
+        }
+        return arr;
+      }
+    }
+  } catch (e) {
+    log('WARN', 'CARDAPIO', 'Falha ao ler cardapio.json, usando padrão', { error: e.message });
+  }
+  const padrao = obterCardapioPadrao();
+  salvarCardapio(padrao);
+  return padrao;
+}
+
+function salvarCardapio(lista) {
+  try {
+    const tmp = CARDAPIO_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(lista, null, 2), 'utf8');
+    fs.renameSync(tmp, CARDAPIO_FILE);
+    return lista;
+  } catch (e) {
+    log('ERROR', 'CARDAPIO', 'Falha ao salvar cardapio', { error: e.message });
+    return lista;
+  }
+}
 function texto(v, max = 200) {
   return String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, max);
 }
@@ -506,6 +560,84 @@ async function handleApi(req, res, caminho) {
     log('INFO', 'PEDIDO', 'Pagamento vinculado', { numero: pedido.numero, status: pedido.pagamento.status });
     return sendJson(res, 200, { ok: true, pagamento: pedido.pagamento });
   }
+
+  // ── CARDÁPIO / PRODUTOS (SINCRONIZAÇÃO MULTI-CLIENTE EM TEMPO REAL) ─────────
+  // GET /api/cardapio — catálogo completo público para todos os visitantes
+  if (caminho === '/api/cardapio' && req.method === 'GET') {
+    const items = lerCardapio();
+    return sendJson(res, 200, { ok: true, total: items.length, items });
+  }
+
+  // POST /api/cardapio — salvar lista completa ou atualizar (somente admin)
+  if (caminho === '/api/cardapio' && req.method === 'POST') {
+    if (!ehAdmin(req)) {
+      log('WARN', 'CARDAPIO', 'Tentativa de salvar cardápio sem senha de admin');
+      return sendJson(res, 401, { error: 'Não autorizado' });
+    }
+    const body = await readBody(req);
+    let lista = lerCardapio();
+    if (Array.isArray(body.items)) {
+      lista = salvarCardapio(body.items);
+      log('INFO', 'CARDAPIO', 'Cardápio completo atualizado pelo admin', { total: lista.length });
+      return sendJson(res, 200, { ok: true, total: lista.length, items: lista });
+    }
+    const item = body.item || body;
+    if (item && item.nome && typeof item.preco === 'number') {
+      const id = item.id || ('item_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
+      const itemFormatado = { ...item, id };
+      const idx = lista.findIndex(i => i.id === id);
+      if (idx >= 0) {
+        lista[idx] = { ...lista[idx], ...itemFormatado };
+      } else {
+        lista.push(itemFormatado);
+      }
+      salvarCardapio(lista);
+      log('INFO', 'CARDAPIO', 'Item salvo no cardápio pelo admin', { id, nome: item.nome });
+      return sendJson(res, 200, { ok: true, item: itemFormatado, items: lista });
+    }
+    return sendJson(res, 400, { error: 'Dados do item inválidos' });
+  }
+
+  // POST /api/cardapio/item — cadastrar / atualizar item individualmente (somente admin)
+  if (caminho === '/api/cardapio/item' && req.method === 'POST') {
+    if (!ehAdmin(req)) {
+      log('WARN', 'CARDAPIO', 'Tentativa de salvar item sem senha de admin');
+      return sendJson(res, 401, { error: 'Não autorizado' });
+    }
+    const body = await readBody(req);
+    const item = body.item || body;
+    if (!item || !item.nome || typeof item.preco !== 'number') {
+      return sendJson(res, 400, { error: 'Informe nome e preço válidos' });
+    }
+    const lista = lerCardapio();
+    const id = item.id || ('item_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
+    const itemFormatado = { ...item, id };
+    const idx = lista.findIndex(i => i.id === id);
+    if (idx >= 0) {
+      lista[idx] = { ...lista[idx], ...itemFormatado };
+    } else {
+      lista.push(itemFormatado);
+    }
+    salvarCardapio(lista);
+    log('INFO', 'CARDAPIO', 'Item atualizado no servidor pelo admin', { id, nome: item.nome, preco: item.preco });
+    return sendJson(res, 200, { ok: true, item: itemFormatado, items: lista });
+  }
+
+  // DELETE /api/cardapio/:id — remover produto do cardápio (somente admin)
+  if (/^\/api\/cardapio\/[^/]+$/.test(caminho) && req.method === 'DELETE') {
+    if (!ehAdmin(req)) {
+      log('WARN', 'CARDAPIO', 'Tentativa de deletar item sem senha de admin');
+      return sendJson(res, 401, { error: 'Não autorizado' });
+    }
+    const id = decodeURIComponent(caminho.replace(/^\/api\/cardapio\//, ''));
+    let lista = lerCardapio();
+    const antes = lista.length;
+    lista = lista.filter(i => i.id !== id);
+    salvarCardapio(lista);
+    log('INFO', 'CARDAPIO', 'Item deletado do cardápio', { id, removido: antes > lista.length });
+    return sendJson(res, 200, { ok: true, items: lista });
+  }
+
   // POST /api/testar-conexao
   if (caminho === '/api/testar-conexao' && req.method === 'POST') {
     const cfg = lerConfig();

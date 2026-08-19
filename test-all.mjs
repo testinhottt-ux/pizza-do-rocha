@@ -27,8 +27,8 @@ describe('🍕 PIZZARIA DO ROCHA — SUITE COMPLETA', async () => {
     const items = store.getItems();
     assert.ok(items.length > 0, 'Deve ter itens seedados');
     assert.equal(items.length, 12, 'Deve ter 12 opções (10 pizzas + 2 bebidas)');
-    const bebidas = items.filter(i => i.categoria === 'Bebidas');
-    assert.equal(bebidas.length, 2, 'Seed inclui exatamente 2 bebidas');
+    const bebidas = items.filter(i => i.categoria.includes('Bebidas'));
+    assert.equal(bebidas.length, 2, 'Seed inclui exatamente 2 bebidas 2 Litros');
     assert.ok(!items.some(i => /[áa]gua|mineral/i.test(i.nome)), 'Água removida do cardápio');
     assert.ok(items.some(i => i.nome.includes('Salaminho')), 'Pizza 1/2 Salaminho e 1/2 Lombinho presente');
     console.log(`   ✓ ${items.length} produtos: ${bebidas.length} bebidas + ${items.length - bebidas.length} pizzas`);

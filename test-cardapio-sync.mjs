@@ -63,16 +63,18 @@ try {
   assert.equal(temAgua, false, 'Água mineral NÃO deve existir no cardápio');
   logPass('Água mineral removida com sucesso do cardápio');
 
-  // 1.2 Bebidas devem ser apenas Coca-Cola e Guaraná Antarctica a R$ 13,99
-  const bebidas = itemsIniciais.filter(i => i.categoria === 'Bebidas');
+  // 1.2 Bebidas devem ser apenas Coca-Cola e Guaraná Antarctica 2 Litros a R$ 13,99
+  const bebidas = itemsIniciais.filter(i => i.categoria.includes('Bebidas'));
   assert.equal(bebidas.length, 2, 'Devem existir exatamente 2 bebidas');
   const coca = bebidas.find(i => /coca/i.test(i.nome));
   const guarana = bebidas.find(i => /guaran[aá]/i.test(i.nome));
   assert.ok(coca, 'Coca-Cola deve estar presente');
   assert.ok(guarana, 'Guaraná Antarctica deve estar presente');
+  assert.ok(coca.nome.includes('2 Litros') || coca.descricao.includes('2 litros'), 'Coca deve especificar 2 litros');
+  assert.ok(guarana.nome.includes('2 Litros') || guarana.descricao.includes('2 litros'), 'Guaraná deve especificar 2 litros');
   assert.equal(coca.preco, 13.99, 'Coca-Cola deve custar R$ 13,99');
   assert.equal(guarana.preco, 13.99, 'Guaraná Antarctica deve custar R$ 13,99');
-  logPass('Bebidas configuradas: apenas Coca-Cola e Guaraná Antarctica a R$ 13,99');
+  logPass('Bebidas configuradas: apenas Coca-Cola e Guaraná Antarctica 2 Litros a R$ 13,99');
 
   // 1.3 Pizza 1/2 Salaminho e 1/2 Lombinho Canadense deve estar no cardápio
   const salaminhoMedia = itemsIniciais.find(i => i.nome.includes('Salaminho') && i.nome.includes('Média'));

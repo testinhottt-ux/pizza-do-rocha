@@ -2,7 +2,7 @@
 // Persistência: localStorage. Usado por todas as páginas via <script type="module">.
 
 const KEY = 'pizzariaRochaDB';
-const MENU_VERSION = 5;
+const MENU_VERSION = 6;
 // A senha real do painel vive SOMENTE no servidor (ADMIN_PASS / POST /api/admin/login).
 // O que sobra aqui é só um resumo (FNV-1a) — não permite recuperar a senha original.
 const ADMIN_PASS_HASH = '7481eb56';
@@ -97,8 +97,8 @@ function seedItems() {
 // ---- Seed: bebidas iniciais (entram junto do cardápio na primeira vez / migração) ----
 function seedBebidas() {
   const base = [
-    ['Coca-Cola', 'Bebidas', 13.99, 'Refrigerante de cola gelado.', 'images/bebida-cola.svg', 120],
-    ['Guaraná Antarctica', 'Bebidas', 13.99, 'Refrigerante de guaraná gelado.', 'images/bebida-guarana.svg', 120],
+    ['Coca-Cola · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.', 'images/bebida-cola.svg', 120],
+    ['Guaraná Antarctica · 2 Litros', 'Bebidas · 2 Litros', 13.99, 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.', 'images/bebida-guarana.svg', 120],
   ];
   return base.map(([nome, categoria, preco, descricao, foto, estoque], i) => ({
     id: 'bebida_propaganda_' + i,
@@ -118,13 +118,29 @@ function load() {
     if (!raw) { const db = defaultDB(); save(db); return db; }
     const db = JSON.parse(raw);
     if (db.menuVersion !== MENU_VERSION) {
-      // Migração: remove água e suco, adiciona novos itens do seed e atualiza bebidas para R$ 13,99
+      // Migração: remove água e suco, adiciona novos itens do seed e atualiza bebidas para 2 Litros a R$ 13,99
       let atuais = (db.items || []).filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
       
-      // Atualiza preços de refrigerantes existentes para 13.99
+      // Atualiza refrigerantes existentes para 2 Litros e R$ 13,99
       atuais = atuais.map(i => {
-        if (/coca/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
-        if (/guaran[aá]/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
+        if (/coca/i.test(i?.nome || '')) {
+          return {
+            ...i,
+            nome: 'Coca-Cola · 2 Litros',
+            categoria: 'Bebidas · 2 Litros',
+            preco: 13.99,
+            descricao: 'Refrigerante Coca-Cola 2 litros gelado, ideal para acompanhar sua pizza.'
+          };
+        }
+        if (/guaran[aá]/i.test(i?.nome || '')) {
+          return {
+            ...i,
+            nome: 'Guaraná Antarctica · 2 Litros',
+            categoria: 'Bebidas · 2 Litros',
+            preco: 13.99,
+            descricao: 'Refrigerante Guaraná Antarctica 2 litros gelado, sabor original.'
+          };
+        }
         return i;
       });
 

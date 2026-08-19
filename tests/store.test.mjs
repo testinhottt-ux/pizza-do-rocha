@@ -228,17 +228,19 @@ test('Cardápio contém 1/2 Salaminho e 1/2 Lombinho Canadense com foto', () => 
   assert.equal(store.photoFor(salaminhoMedia.nome, salaminhoMedia.categoria), 'images/pizza-meio-salaminho-lombinho.jpg');
 });
 
-test('Bebidas contém somente Coca-Cola e Guaraná Antarctica com valor 13.99 e sem água', () => {
+test('Bebidas contém somente Coca-Cola e Guaraná Antarctica 2 Litros com valor 13.99 e sem água', () => {
   const items = store.getItems();
-  const bebidas = items.filter(i => i.categoria === 'Bebidas');
+  const bebidas = items.filter(i => i.categoria.includes('Bebidas'));
   
   assert.equal(bebidas.length, 2, 'Deve conter exatamente 2 bebidas');
   const coca = bebidas.find(i => i.nome.includes('Coca'));
   const guarana = bebidas.find(i => i.nome.includes('Guaraná') || i.nome.includes('Guarana'));
   const agua = items.find(i => /[áa]gua|mineral/i.test(i.nome));
   
-  assert.ok(coca, 'Deve ter Coca-Cola');
-  assert.ok(guarana, 'Deve ter Guaraná Antarctica');
+  assert.ok(coca, 'Deve ter Coca-Cola 2 Litros');
+  assert.ok(guarana, 'Deve ter Guaraná Antarctica 2 Litros');
+  assert.ok(coca.nome.includes('2 Litros') || coca.descricao.includes('2 litros'), 'Coca deve especificar 2 litros');
+  assert.ok(guarana.nome.includes('2 Litros') || guarana.descricao.includes('2 litros'), 'Guaraná deve especificar 2 litros');
   assert.equal(coca.preco, 13.99, 'Coca-Cola deve custar 13.99');
   assert.equal(guarana.preco, 13.99, 'Guaraná Antarctica deve custar 13.99');
   assert.equal(agua, undefined, 'Água não deve existir no cardápio');

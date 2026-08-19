@@ -123,13 +123,28 @@ function lerCardapio() {
     if (fs.existsSync(CARDAPIO_FILE)) {
       const arr = JSON.parse(fs.readFileSync(CARDAPIO_FILE, 'utf8'));
       if (Array.isArray(arr) && arr.length > 0) {
-        // Limpa resíduos de água e suco se já salvos anteriormente
-        const filtrado = arr.filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
-        if (filtrado.length !== arr.length) {
-          salvarCardapio(filtrado);
-          return filtrado;
+        // 1. Remove qualquer resíduo de água e suco
+        let limpo = arr.filter(i => !/[áa]gua|mineral|suco/i.test(i?.nome || '') && !/[áa]gua|mineral|suco/i.test(i?.descricao || ''));
+        
+        // 2. Atualiza preços de refrigerantes existentes para 13.99
+        limpo = limpo.map(i => {
+          if (/coca/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
+          if (/guaran[aá]/i.test(i?.nome || '')) return { ...i, preco: 13.99 };
+          return i;
+        });
+
+        // 3. Adiciona pizzas do catálogo base que ainda não estejam presentes (ex: 1/2 Salaminho)
+        const padrao = obterCardapioPadrao();
+        for (const itemPadrao of padrao) {
+          if (!limpo.some(i => i.id === itemPadrao.id || i.nome === itemPadrao.nome)) {
+            limpo.push(itemPadrao);
+          }
         }
-        return arr;
+
+        if (JSON.stringify(limpo) !== JSON.stringify(arr)) {
+          salvarCardapio(limpo);
+        }
+        return limpo;
       }
     }
   } catch (e) {

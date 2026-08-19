@@ -64,6 +64,9 @@ try {
   const rImg = await fetch(BASE + '/images/pizza-margherita.jpg');
   test('Imagens do cardápio servidas corretamente', rImg.status === 200);
 
+  const rQr = await fetch(BASE + '/images/qrcode-pizzadorocha.png');
+  test('Imagem do QR Code Awwwards servida (HTTP 200)', rQr.status === 200);
+
   // ── 2. SEGURANÇA E HARDENING (MDCA EIXO 5) ──
   console.log('\n[2/5] Testando Blindagem e Segurança HTTP...');
   const rSec1 = await fetch(BASE + '/server-config.json');

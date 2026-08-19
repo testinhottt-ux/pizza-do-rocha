@@ -682,9 +682,9 @@
             <!-- InfiniteTag -->
             <div>
               <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #1a1210;">🏷️ InfiniteTag</label>
-              <input type="text" id="infinitePayHandle" placeholder="sua_infinite_tag" 
+              <input type="text" id="infinitePayHandle" placeholder="$yoney-suarez" value="$yoney-suarez"
                 style="width: 100%; padding: 12px 14px; border: 1px solid #d9cbb3; border-radius: 6px; font-size: 14px; box-sizing: border-box; font-family: monospace; transition: border-color 0.2s;">
-              <small style="display: block; margin-top: 4px; color: #8a7862;">Use a InfiniteTag sem o símbolo $; a credencial real fica protegida no servidor.</small>
+              <small style="display: block; margin-top: 4px; color: #8a7862;">Tag oficial InfinitePay ($yoney-suarez) configurada no servidor.</small>
             </div>
 
             <!-- WhatsApp Notificação com Botão Salvar ao lado -->
@@ -2270,10 +2270,11 @@ const nome = document.getElementById('clienteNome').value.trim();
             ${o.cliente?.endereco ? `<div>📍 ${escapeHtml(o.cliente.endereco)}</div>` : ''}
             <div>💳 ${escapeHtml((o.pagamento?.metodo || '').toUpperCase() || '—')} · ${o.pagamento?.status === 'aprovado' ? '<strong style="color:#2e7d32;">PAGO</strong>' : '<strong style="color:#b26a00;">aguardando</strong>'}</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
             <span style="background: #f4ede1; color: #1a1210; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;">
               ${store.statusLabel(o.status)}
             </span>
+            <button onclick="imprimirComandaPedido('${o.id}')" style="background: #e8432f; color: #ffffff; border: none; padding: 10px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">🖨️ Imprimir Comanda</button>
             ${next ? `<button onclick="advanceOrderStatus('${o.id}', '${next}')" style="background: var(--carvao); color: var(--creme); border: none; padding: 10px 20px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 600;">Avançar → ${store.statusLabel(next)}</button>` : ''}
           </div>
         </div>
@@ -2320,6 +2321,101 @@ const nome = document.getElementById('clienteNome').value.trim();
         showToast('Status atualizado + WhatsApp enviado ao cliente!');
       }
     } catch (e) { /* falha silenciosa do WhatsApp */ }
+  };
+
+  window.imprimirComandaPedido = function(id) {
+    const order = pedidosServidor.find(o => o.id === id) || store.getOrder(id);
+    if (!order) return alert('Pedido não encontrado para impressão.');
+
+    const itensHtml = (order.itens || []).map(it => `
+      <div style="display:flex; justify-content:space-between; margin:3px 0; font-size:12px;">
+        <span><strong>${it.qtd}x</strong> ${escapeHtml(it.nome)}</span>
+        <span>R$ ${(Number(it.preco || 0) * (it.qtd || 1)).toFixed(2).replace('.', ',')}</span>
+      </div>
+    `).join('');
+
+    const cupomHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Comanda #${order.numero} - Pizzaria do Rocha</title>
+  <style>
+    @page { size: 58mm auto; margin: 0; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      width: 52mm;
+      margin: 0 auto;
+      padding: 4px;
+      font-size: 11px;
+      line-height: 1.25;
+      color: #000;
+      background: #fff;
+    }
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .title { font-size: 15px; font-weight: 900; }
+    .subtitle { font-size: 10px; }
+    .divider { border-top: 1px dashed #000; margin: 5px 0; }
+    .divider-double { border-top: 2px solid #000; margin: 6px 0; }
+    .big { font-size: 16px; font-weight: 900; }
+    .item-row { display: flex; justify-content: space-between; margin: 3px 0; }
+    .section-title { font-weight: bold; text-transform: uppercase; margin-top: 4px; }
+    @media print {
+      body { width: 100%; margin: 0; padding: 2px; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom: 10px; text-align: center;">
+    <button onclick="window.print()" style="padding: 8px 16px; background: #e8432f; color: #fff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">🖨️ IMPRIMIR</button>
+  </div>
+  <div class="center">
+    <div class="title">PIZZARIA DO ROCHA</div>
+    <div class="subtitle">Sabor & Qualidade em Cada Fatia</div>
+    <div class="subtitle">WhatsApp: (31) 99186-7625</div>
+  </div>
+  <div class="divider-double"></div>
+  <div class="center big">PEDIDO #${order.numero}</div>
+  <div class="center" style="font-size: 10px;">${new Date(order.criadoEm || Date.now()).toLocaleString('pt-BR')}</div>
+  <div class="divider"></div>
+  <div class="section-title">👤 DADOS DE ENTREGA:</div>
+  <div><strong>Cliente:</strong> ${escapeHtml(order.cliente?.nome || 'Cliente')}</div>
+  ${order.cliente?.telefone ? `<div><strong>Telefone:</strong> ${escapeHtml(order.cliente.telefone)}</div>` : ''}
+  ${order.cliente?.endereco ? `<div><strong>Endereço:</strong> ${escapeHtml(order.cliente.endereco)}</div>` : ''}
+  <div class="divider"></div>
+  <div class="section-title">🍕 ITENS:</div>
+  ${itensHtml}
+  <div class="divider"></div>
+  <div class="item-row bold" style="font-size: 13px;">
+    <span>TOTAL:</span>
+    <span>R$ ${(order.total || 0).toFixed(2).replace('.', ',')}</span>
+  </div>
+  <div class="item-row" style="font-size: 10px; margin-top: 3px;">
+    <span>PAGAMENTO:</span>
+    <span>${escapeHtml((order.pagamento?.metodo || 'PIX/CARTÃO').toUpperCase())} (${order.pagamento?.status === 'aprovado' ? 'PAGO' : 'PENDENTE'})</span>
+  </div>
+  <div class="divider-double"></div>
+  <div class="center" style="font-size: 9px;">
+    *** CONTROLE EXTERNO / COZINHA ***<br>
+    www.pizzadorocha.com.br
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 250);
+    };
+  </script>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank', 'width=380,height=600');
+    if (w) {
+      w.document.open();
+      w.document.write(cupomHtml);
+      w.document.close();
+    } else {
+      alert('Habilite popups no navegador para visualizar a comanda de impressão.');
+    }
   };
 
   // ===== UTILS =====

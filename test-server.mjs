@@ -72,6 +72,18 @@ try {
     cond: homeRes.status === 200
   });
 
+  // 1b. GET /arquitetura
+  const archRes = await fetch(BASE + '/arquitetura');
+  logStep({
+    num: '1b',
+    name: 'Servir Dashboard de Arquitetura Mermaid',
+    endpoint: 'GET /arquitetura',
+    input: { headers: 'Accept: text/html' },
+    output: { status: archRes.status, body: 'HTML Mermaid Architecture Visualizer' },
+    explanation: 'Entrada: requisição HTTP GET na rota de arquitetura. Saída: código HTTP 200 entregando o visualizador de diagramas C4 e Mermaid.',
+    cond: archRes.status === 200
+  });
+
   // 2. GET /api/config
   const cfg = await req('GET', '/api/config');
   logStep({

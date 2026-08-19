@@ -339,6 +339,10 @@ function servirEstatico(req, res, caminho) {
   if (p === '/ad' || p === '/admin' || p === '/ad/' || p === '/admin/') {
     p = '/index.html';
   }
+  // Rotas de documentação e arquitetura Mermaid
+  if (p === '/docs' || p === '/docs/' || p === '/arquitetura' || p === '/arquitetura/') {
+    p = '/docs/arquitetura-mermaid.html';
+  }
 
   // Bloqueio de segurança: arquivos ocultos, diretórios internos e arquivos sensíveis
   if (/(^|\/)\./.test(p) || /^\/(LOGS|wa-session|node_modules|vps|tests|uploads)\b/i.test(p) || /\.(mjs|md|json|ya?ml|env|log|pid|bak)$/i.test(p)) {

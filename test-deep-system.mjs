@@ -43,6 +43,9 @@ try {
   const rAd = await fetch(BASE + '/ad');
   test('/ad entrega aplicação de forma transparente', rAd.status === 200);
 
+  const rDocs = await fetch(BASE + '/arquitetura');
+  test('/arquitetura entrega painel visual Mermaid (HTTP 200)', rDocs.status === 200);
+
   const rCss = await fetch(BASE + '/styles.css');
   test('styles.css servido', rCss.status === 200);
 

@@ -1,5 +1,5 @@
 // sw.js — Service Worker da Pizzaria do Rocha (Network-First com Limpeza Automática de Cache)
-const CACHE_NAME = 'pizzaria-rocha-v2.8.4';
+const CACHE_NAME = 'pizzaria-rocha-v2.8.5';
 
 self.addEventListener('install', (event) => {
   // Ativação imediata sem esperar o fechamento de abas

@@ -209,7 +209,7 @@ function metodoLabel(m) {
 // ── Config persistente (chaves ficam no servidor) ──
 const DEFAULT_CONFIG = {
   infinitePayHandle: process.env.INFINITEPAY_HANDLE || '',
-  whatsappNotif: '559991867625',
+  whatsappNotif: '5531991867625',
   modoSimulacao: true,
   // Modo landing: o site vira cardápio + pedir via WhatsApp (sem compra/sistema).
   modoLanding: false,
@@ -279,12 +279,12 @@ function novoVencimento() {
   const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0];
 }
 function servirEstatico(req, res, caminho) {
-  let p = decodeURIComponent(caminho);
+  let p = decodeURIComponent(caminho).replace(/\/+/g, '/');
   if (p === '/' || p === '') p = '/index.html';
-  // Rota secreta do painel: /ad (e aliases /admin, /ad/) entrega o próprio site, que abre o login da equipe.
-  // /ad/, /admin e /admin/ redirecionam para /ad para os caminhos relativos continuarem válidos.
-  if (p === '/ad/' || p === '/admin' || p === '/admin/') { res.writeHead(302, { Location: '/ad' }); res.end(); return; }
-  if (p === '/ad') p = '/index.html';
+  // Rota secreta do painel: /ad, /admin, /ad/, /admin/ entrega o próprio site que abre o painel
+  if (p === '/ad' || p === '/admin' || p === '/ad/' || p === '/admin/') {
+    p = '/index.html';
+  }
 
   // Bloqueio de segurança: arquivos ocultos, diretórios internos e arquivos sensíveis
   if (/(^|\/)\./.test(p) || /^\/(LOGS|wa-session|node_modules|vps|tests|uploads)\b/i.test(p) || /\.(mjs|md|json|ya?ml|env|log|pid|bak)$/i.test(p)) {
@@ -718,7 +718,7 @@ const server = http.createServer((req, res) => {
   let caminho = '/';
   try {
     const u = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-    caminho = u.pathname;
+    caminho = u.pathname.replace(/\/+/g, '/');
   } catch {
     log('WARN', 'SERVER', 'Request com URL inválida', { url: String(req.url).slice(0, 200) });
   }

@@ -20,10 +20,10 @@ const STATUS_LABELS = {
 // ---- Contato oficial ----
 export const CONTATO = {
   nome: 'Pizzaria do Rocha',
-  telefone: '(99) 91867-625',
-  telefoneDigits: '559991867625',
-  whatsapp: 'https://wa.me/559991867625',
-  whatsappMsg: 'https://wa.me/559991867625?text=' +
+  telefone: '(31) 99186-7625',
+  telefoneDigits: '5531991867625',
+  whatsapp: 'https://wa.me/5531991867625',
+  whatsappMsg: 'https://wa.me/5531991867625?text=' +
     encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.'),
   endereco: '',
   enderecoCurto: '',

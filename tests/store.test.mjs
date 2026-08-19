@@ -192,8 +192,8 @@ test('statusLabel devolve rótulo legível', () => {
 // ============ CONTATO E FOTOS (novos) ============
 
 test('CONTATO tem telefone, whatsapp e endereço corretos', () => {
-  assert.equal(store.CONTATO.telefone, '(99) 91867-625');
-  assert.match(store.CONTATO.whatsapp, /wa\.me\/559991867625/);
+  assert.equal(store.CONTATO.telefone, '(31) 99186-7625');
+  assert.match(store.CONTATO.whatsapp, /wa\.me\/5531991867625/);
   assert.equal(store.CONTATO.endereco, '');
   assert.equal(store.CONTATO.horario, 'Todos os dias · 18h às 21h');
 });

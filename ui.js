@@ -49,7 +49,7 @@ export function renderFooter() {
 }
 
 export function renderWhatsApp() {
-  const numero = (typeof window !== 'undefined' && window.APP_WHATSAPP) || '559991867625';
+  const numero = (typeof window !== 'undefined' && window.APP_WHATSAPP) || '5531991867625';
   const href = `https://wa.me/${numero}?text=${encodeURIComponent('Olá! Gostaria de fazer um pedido na Pizzaria do Rocha.')}`;
   return `<a class="wa-float" href="${href}" target="_blank" rel="noopener" aria-label="WhatsApp">${WA_SVG} WhatsApp</a>`;
 }

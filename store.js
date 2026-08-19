@@ -2,7 +2,7 @@
 // Persistência: localStorage. Usado por todas as páginas via <script type="module">.
 
 const KEY = 'pizzariaRochaDB';
-const MENU_VERSION = 7;
+const MENU_VERSION = 8;
 // A senha real do painel vive SOMENTE no servidor (ADMIN_PASS / POST /api/admin/login).
 // O que sobra aqui é só um resumo (FNV-1a) — não permite recuperar a senha original.
 const ADMIN_PASS_HASH = '7481eb56';
@@ -54,7 +54,7 @@ const FOTO_KEYWORDS = [
   [/marg|mussar|muçar|queijo|napolit/i, 'images/pizza-margherita.jpg'],
   [/pepper|peperoni|pepperoni/i, 'images/pizza-pepperoni.jpg'],
   [/calabr|lingu|bacon/i, 'images/pizza-calabresa.jpg'],
-  [/quatro|4 queijo|4queijo|especial|premium/i, 'images/pizza-especial-rocha.jpg'],
+  [/quatro|4 queijo|4queijo|especial|premium|teste/i, 'images/pizza-especial-rocha.jpg'],
   [/portug|lombo|presunto|ovo/i, 'images/pizza-portuguesa.jpg'],
   [/frango|catupiry|chicken/i, 'images/pizza-frango.jpg'],
   // Bebidas (fotos reais de alta resolução nível Awwwards)
@@ -85,12 +85,13 @@ function seedItems() {
     ['Marguerita · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Molho, muçarela, tomate, manjericão, queijo ralado e orégano.', 'images/pizza-margherita.jpg'],
     ['1/2 Salaminho e 1/2 Lombinho Canadense · Média', 'Pizza média · 30 cm · 6 pedaços', 49.99, 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', 'images/pizza-meio-salaminho-lombinho.jpg'],
     ['1/2 Salaminho e 1/2 Lombinho Canadense · Gigante', 'Pizza gigante · 35 cm · 8 pedaços', 59.99, 'Metade salaminho especial com muçarela e orégano, metade lombinho canadense fatiado com queijo e temperos da casa.', 'images/pizza-meio-salaminho-lombinho.jpg'],
+    ['Pizza de Teste (Compra Real)', 'Pizza Broto · 20 cm · 4 pedaços', 1.00, 'Pizza especial de teste para validação de compras reais via PIX e Cartão InfinitePay.', 'images/pizza-especial-rocha.jpg'],
   ];
   return base.map(([nome, categoria, preco, descricao, foto], i) => ({
     id: 'propaganda_' + i,
     nome, categoria, preco, descricao, foto,
     estoque: 999, ativo: true,
-    destaque: i === 0 || i === 1 || i === 8, // Destaques iniciais da Home
+    destaque: i === 0 || i === 1 || i === 8 || i === 10, // Destaques iniciais da Home
   }));
 }
 

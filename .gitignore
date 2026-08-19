@@ -1,25 +1,75 @@
-node_modules/
+# ==============================================================================
+# .gitignore — Pizzaria do Rocha (Exibição Landing Page GitHub)
+# ==============================================================================
+
+# --- Alibaba Cloud & Credenciais / Segredos ---
+AccessKey.csv
+*ali*
+*Ali*
+*ALI*
+*key*
+*Key*
+*KEY*
+*.csv
+*.pem
+*.pub
 .env
-.env.local
-.env.*.local
-*.log
-LOGS/
+.env.*
+.admin-password
+server-config.json
+vps/
+MANUAL_SEGURANCA_ALIBABA_VPS.md
+GUIA_SEGURANCA_WEB.md
+
+# --- Arquivos do Protocolo AG / Modelos / Agentes ---
+ag*.md
+ag2.md
+ag3.md
+
+# --- Sistema Backend / Servidor / WhatsApp / Pagamento ---
+server.mjs
+whatsapp-web.mjs
+infinitepay-client.mjs
+ecosystem.config.cjs
+render.yaml
+node_modules/
+package.json
+package-lock.json
 wa-session*
 wa-session.bak/
-.admin-password
+LOGS/
+*.log
 *.pid
+backups/
+uploads/
+screenshots/
+.workbench/
+
+# --- Testes e QA ---
+test-*.mjs
+tests/
+
+# --- Páginas Legadas / DC / Suporte Interno ---
+*.dc.html
+ui.js
+support.js
+.thumbnail
+
+# --- Documentação Interna & Logs de Execução ---
+progresso.md
+flow.md
+error.md
+solucoes.md
+docs/
+ANALISE_COMPARATIVA_SISTEMAS_DELIVERY.md
+RESUMO_IMPLEMENTACOES_*.md
+CHEATSHEET.md
+
+# --- Sistema / IDEs / Temporários ---
 .DS_Store
 *.swp
 *.swo
 *~
 .vscode/
 .idea/
-.env.production
-server-config.json
-package-lock.json
-uploads/
-screenshots/
-vps/.cloudflare
-vps/*.pem
-vps/*.pub
-ag*.md
+qrcodepizzadorocha.png
